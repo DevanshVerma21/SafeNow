@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+databases
+asyncpg
+alembic
+python-jose[cryptography]
+passlib[bcrypt]
+psycopg2-binary
+redis
+python-multipart
+pydantic
+aiofiles
+python-dotenv
+requests
+redis>=4.5.0
