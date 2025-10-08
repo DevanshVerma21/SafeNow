@@ -284,9 +284,45 @@
 
 /* Leaflet Map Markers Custom Styles */
 .leaflet-container {
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 1;
+  background: #f8f9fa;
+  font-family: inherit;
+}
+
+.leaflet-tile-pane {
+  z-index: 2;
+}
+
+.leaflet-overlay-pane {
+  z-index: 4;
+}
+
+.leaflet-shadow-pane {
+  z-index: 5;
+}
+
+.leaflet-marker-pane {
+  z-index: 6;
+}
+
+.leaflet-tooltip-pane {
+  z-index: 7;
+}
+
+.leaflet-popup-pane {
+  z-index: 8;
+}
+
+.leaflet-tile-container {
+  pointer-events: auto;
+}
+
+.leaflet-tile {
+  filter: inherit;
+  visibility: inherit;
+  opacity: inherit;
 }
 
 /* Custom marker styles */
@@ -307,5 +343,23 @@
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+/* Ping animation for markers */
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Pulse animation for markers */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
