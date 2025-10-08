@@ -549,15 +549,24 @@ async def startup():
     
     try:
         await database.connect()
-    except Exception:
-        print('Could not connect to DB on startup; continuing in demo mode')
+        print("✅ Database connected")
+    except Exception as e:
+        print(f'⚠️ Database connection failed: {e}')
+        print('🔄 Continuing in demo mode with in-memory storage')
+    
     # connect redis
     try:
         await connect_redis()
+        print("✅ Redis connected")
         # start redis subscriber task
         asyncio.create_task(_redis_subscriber())
-    except Exception:
-        print('Redis not available; running single-instance mode')
+    except Exception as e:
+        print(f'⚠️ Redis connection failed: {e}')
+        print('Running single-instance mode')
+    
+    # Start background cleanup task
+    asyncio.create_task(periodic_cleanup())
+    print("🧹 Started periodic cleanup task")
 
 
 @app.on_event('shutdown')
@@ -565,17 +574,20 @@ async def shutdown():
     global ALERTS, USERS
     
     # Save data before shutdown
-    print("Saving data before shutdown...")
+    print("💾 Saving data before shutdown...")
     save_alerts(ALERTS)
     save_users(USERS)
-    print("Data saved successfully")
+    print("✅ Data saved successfully")
     
     try:
         await database.disconnect()
+        print("✅ Database disconnected")
     except Exception:
         pass
+    
     try:
         await disconnect_redis()
+        print("✅ Redis disconnected")
     except Exception:
         pass
 
@@ -664,42 +676,8 @@ async def periodic_cleanup():
             await asyncio.sleep(60)  # Wait longer on error
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database and start background tasks."""
-    try:
-        await database.connect()
-        print("✅ Database connected")
-    except Exception as e:
-        print(f"⚠️ Database connection failed: {e}")
-        print("🔄 Continuing in demo mode with in-memory storage")
-    
-    try:
-        await connect_redis()
-        print("✅ Redis connected")
-    except Exception as e:
-        print(f"⚠️ Redis connection failed: {e}")
-    
-    # Start background cleanup task
-    asyncio.create_task(periodic_cleanup())
-    print("🧹 Started periodic cleanup task")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Clean up connections on shutdown."""
-    try:
-        await database.disconnect()
-        print("✅ Database disconnected")
-    except Exception:
-        pass
-    
-    try:
-        await disconnect_redis()
-        print("✅ Redis disconnected")
-    except Exception:
-        pass
+# Duplicate startup/shutdown removed - using the ones above with demo data initialization
 
 
 if __name__ == '__main__':
-    uvicorn.run('app:app', host='0.0.0.0', port=8000, reload=True)
+    uvicorn.run('backend.app:app', host='0.0.0.0', port=8000, reload=True)
