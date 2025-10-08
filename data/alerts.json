@@ -1,0 +1,16 @@
+{
+  "00c2ff90-949f-4852-9272-cdf7439b65af": {
+    "type": "medical",
+    "note": "Emergency alert from mobile app - Medical Emergency",
+    "location": {
+      "lat": 30.51603214335034,
+      "lng": 76.66028137689032,
+      "accuracy": 61.0
+    },
+    "attachments": [],
+    "id": "00c2ff90-949f-4852-9272-cdf7439b65af",
+    "user_id": "f44281d5-43ea-4c0a-8065-95522c499633",
+    "status": "open",
+    "created_at": null
+  }
+}

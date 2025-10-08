@@ -27,14 +27,21 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
   }
   
   if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/dashboard" replace />;
+    // Redirect to user's appropriate dashboard based on their role
+    if (user.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    } else if (user.role === 'volunteer' || user.role === 'responder') {
+      return <Navigate to="/responder" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
   
   return children;
 };
 
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
@@ -49,6 +56,15 @@ function AppContent() {
   if (!isAppReady || loading) {
     return <LoadingScreen />;
   }
+  
+  // Helper function to get default dashboard based on role
+  const getDefaultDashboard = () => {
+    if (!isAuthenticated || !user) return '/login';
+    
+    if (user.role === 'admin') return '/admin';
+    if (user.role === 'volunteer' || user.role === 'responder') return '/responder';
+    return '/dashboard';
+  };
 
   return (
     <div className="min-h-screen">
@@ -116,7 +132,7 @@ function AppContent() {
             path="/" 
             element={
               <Navigate 
-                to={isAuthenticated ? "/dashboard" : "/login"} 
+                to={getDefaultDashboard()} 
                 replace 
               />
             } 

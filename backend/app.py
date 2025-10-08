@@ -12,6 +12,18 @@ from backend.db import database
 from backend.utils import pick_nearest_responder, estimate_eta_seconds
 from backend.redis_client import connect_redis, disconnect_redis, publish
 from backend import redis_client as redis_client_module
+from backend.demo_data import (
+    initialize_demo_data, 
+    load_alerts, 
+    save_alerts, 
+    load_users, 
+    save_users,
+    get_user_by_phone,
+    is_demo_user,
+    get_demo_otp,
+    get_user_role,
+    DEMO_USERS
+)
 import json
 
 
@@ -27,7 +39,7 @@ app.add_middleware(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-# In-memory stores for demo
+# Load persistent data on startup
 USERS = {}
 ALERTS = {}
 CONNECTED_WEBSOCKETS: List[WebSocket] = []
@@ -36,8 +48,15 @@ RESPONDERS = {}
 
 @app.post('/auth/request_otp')
 async def request_otp(req: OTPRequest):
-    # send OTP via mock function and log
-    code = mock_send_otp(req.phone, purpose=req.purpose)
+    # Check if this is a demo user
+    if is_demo_user(req.phone):
+        code = get_demo_otp()
+        print(f"✓ Demo user login: {req.phone} - OTP: {code}")
+    else:
+        # send OTP via mock function and log
+        code = mock_send_otp(req.phone, purpose=req.purpose)
+        print(f"→ Non-demo user login: {req.phone} - OTP: {code}")
+    
     # log OTP in db
     query = "INSERT INTO otp_logs (phone, code, purpose, created_at, expires_at, consumed, attempts) VALUES (:phone, :code, :purpose, now(), now() + interval '5 minutes', false, 0)"
     try:
@@ -50,30 +69,66 @@ async def request_otp(req: OTPRequest):
 
 @app.post('/auth/verify_otp')
 async def verify_otp(v: OTPVerify):
-    ok = verify_otp_code(v.phone, v.code)
+    # Check if demo user with demo OTP
+    if is_demo_user(v.phone) and v.code == get_demo_otp():
+        ok = True
+    else:
+        ok = verify_otp_code(v.phone, v.code)
+    
     if not ok:
         raise HTTPException(status_code=401, detail="Invalid OTP")
-    # create or fetch user in DB
-    select_q = "SELECT id FROM users WHERE phone = :phone"
-    user = None
-    try:
-        user = await database.fetch_one(select_q, values={"phone": v.phone})
-    except Exception:
-        user = None
-
-    if user is None:
-        user_id = str(uuid.uuid4())
-        insert_q = "INSERT INTO users (id, phone, is_verified, created_at, updated_at) VALUES (:id, :phone, true, now(), now())"
-        try:
-            await database.execute(insert_q, values={"id": user_id, "phone": v.phone})
-        except Exception:
-            # Fallback to in-memory
-            USERS[v.phone] = user_id
+    
+    # Get user from demo data or create new
+    demo_user = get_user_by_phone(v.phone)
+    if demo_user:
+        user_id = demo_user["id"]
+        user_role = demo_user["role"]
+        user_name = demo_user.get("name", "User")
+        # Store in USERS dict
+        USERS[v.phone] = demo_user
     else:
-        user_id = str(user[0])
+        # create or fetch user in DB
+        select_q = "SELECT id FROM users WHERE phone = :phone"
+        user = None
+        try:
+            user = await database.fetch_one(select_q, values={"phone": v.phone})
+        except Exception:
+            user = None
 
-    token = create_access_token({"sub": user_id, "phone": v.phone})
-    return {"access_token": token, "token_type": "bearer", "user_id": user_id}
+        if user is None:
+            user_id = str(uuid.uuid4())
+            user_role = "citizen"
+            user_name = "User"
+            insert_q = "INSERT INTO users (id, phone, is_verified, created_at, updated_at) VALUES (:id, :phone, true, now(), now())"
+            try:
+                await database.execute(insert_q, values={"id": user_id, "phone": v.phone})
+            except Exception:
+                # Fallback to in-memory
+                USERS[v.phone] = {
+                    "id": user_id,
+                    "phone": v.phone,
+                    "name": user_name,
+                    "role": user_role,
+                    "is_verified": True
+                }
+        else:
+            user_id = str(user[0])
+            user_role = "citizen"
+            user_name = "User"
+
+    token = create_access_token({
+        "sub": user_id, 
+        "phone": v.phone, 
+        "role": user_role,
+        "name": user_name
+    })
+    return {
+        "access_token": token, 
+        "token_type": "bearer", 
+        "user_id": user_id,
+        "role": user_role,
+        "name": user_name
+    }
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -107,6 +162,10 @@ async def create_alert(a: AlertCreate, user=Depends(get_current_user)):
         print(f"⚠️ Database error, using fallback memory storage: {e}")
         # fallback to in-memory store for demo
         ALERTS[alert_id] = alert
+    
+    # Also save to persistent storage
+    ALERTS[alert_id] = alert
+    save_alerts(ALERTS)
 
     # broadcast to connected websockets
     await broadcast_alert(alert)
@@ -483,6 +542,11 @@ async def responder_decline(responder_id: str, body: dict):
 
 @app.on_event('startup')
 async def startup():
+    global USERS, ALERTS
+    
+    # Initialize demo data and load persistent storage
+    USERS, ALERTS = initialize_demo_data()
+    
     try:
         await database.connect()
     except Exception:
@@ -498,6 +562,14 @@ async def startup():
 
 @app.on_event('shutdown')
 async def shutdown():
+    global ALERTS, USERS
+    
+    # Save data before shutdown
+    print("Saving data before shutdown...")
+    save_alerts(ALERTS)
+    save_users(USERS)
+    print("Data saved successfully")
+    
     try:
         await database.disconnect()
     except Exception:
@@ -630,4 +702,4 @@ async def shutdown_event():
 
 
 if __name__ == '__main__':
-    uvicorn.run('backend.app:app', host='0.0.0.0', port=8000, reload=True)
+    uvicorn.run('app:app', host='0.0.0.0', port=8000, reload=True)

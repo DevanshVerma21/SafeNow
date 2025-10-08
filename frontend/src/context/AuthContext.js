@@ -75,25 +75,27 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(`${API_BASE}/auth/verify_otp`, {
         phone,
-        code,
-        role
+        code
       });
 
-      const { access_token, user_id, user_role } = response.data;
+      const { access_token, user_id, role: userRole, name } = response.data;
       
       localStorage.setItem('token', access_token);
       
       const userData = {
         id: user_id,
         phone,
-        role: user_role || role,
+        role: userRole || role,
+        name: name || 'User',
         authenticated_at: new Date().toISOString()
       };
       
       setUser(userData);
       setIsAuthenticated(true);
       
-      toast.success(`Welcome! Logged in as ${role}`);
+      // Role-based success message
+      const roleDisplay = userRole || role;
+      toast.success(`Welcome ${name || 'User'}! Logged in as ${roleDisplay}`);
       
       return userData;
     } catch (error) {

@@ -1,0 +1,77 @@
+{
+  "+1234567890": {
+    "id": "admin-001",
+    "phone": "+1234567890",
+    "name": "Admin User",
+    "role": "admin",
+    "email": "admin@safenow.com",
+    "is_verified": true
+  },
+  "+1234567891": {
+    "id": "volunteer-001",
+    "phone": "+1234567891",
+    "name": "John Doe",
+    "role": "volunteer",
+    "email": "john.doe@safenow.com",
+    "is_verified": true,
+    "specialization": "Medical"
+  },
+  "+1234567892": {
+    "id": "volunteer-002",
+    "phone": "+1234567892",
+    "name": "Jane Smith",
+    "role": "volunteer",
+    "email": "jane.smith@safenow.com",
+    "is_verified": true,
+    "specialization": "Fire & Rescue"
+  },
+  "+1234567893": {
+    "id": "volunteer-003",
+    "phone": "+1234567893",
+    "name": "Mike Johnson",
+    "role": "volunteer",
+    "email": "mike.johnson@safenow.com",
+    "is_verified": true,
+    "specialization": "Police"
+  },
+  "+1234567894": {
+    "id": "citizen-001",
+    "phone": "+1234567894",
+    "name": "Alice Brown",
+    "role": "citizen",
+    "email": "alice.brown@example.com",
+    "is_verified": true
+  },
+  "+1234567895": {
+    "id": "citizen-002",
+    "phone": "+1234567895",
+    "name": "Bob Wilson",
+    "role": "citizen",
+    "email": "bob.wilson@example.com",
+    "is_verified": true
+  },
+  "+1234567896": {
+    "id": "citizen-003",
+    "phone": "+1234567896",
+    "name": "Carol Davis",
+    "role": "citizen",
+    "email": "carol.davis@example.com",
+    "is_verified": true
+  },
+  "+1234567897": {
+    "id": "citizen-004",
+    "phone": "+1234567897",
+    "name": "David Miller",
+    "role": "citizen",
+    "email": "david.miller@example.com",
+    "is_verified": true
+  },
+  "+1234567898": {
+    "id": "citizen-005",
+    "phone": "+1234567898",
+    "name": "Emma Garcia",
+    "role": "citizen",
+    "email": "emma.garcia@example.com",
+    "is_verified": true
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   PhoneIcon, 
@@ -11,10 +12,11 @@ import {
 
 const LoginPage = () => {
   const { requestOTP, verifyOTP } = useAuth();
-  const [step, setStep] = useState(0); // 0: role selection, 1: phone, 2: OTP
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1); // 1: phone, 2: OTP (removed role selection)
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
-  const [role, setRole] = useState('citizen');
+  const [role, setRole] = useState('citizen'); // default role, will be determined by backend
   const [loading, setLoading] = useState(false);
 
   const roles = [
@@ -73,8 +75,16 @@ const LoginPage = () => {
     
     setLoading(true);
     try {
-      await verifyOTP(phone, code, role);
-      // Auth context will handle the redirect
+      const userData = await verifyOTP(phone, code, role);
+      
+      // Redirect based on user role
+      if (userData.role === 'admin') {
+        navigate('/admin');
+      } else if (userData.role === 'volunteer' || userData.role === 'responder') {
+        navigate('/responder');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error('OTP verification failed:', error);
     } finally {
@@ -114,49 +124,10 @@ const LoginPage = () => {
             Emergency Response System
           </h2>
           <p className="mt-2 text-gray-600">
-            {step === 0 && "Select your role to continue"}
             {step === 1 && "Enter your phone number"}
             {step === 2 && "Enter the verification code"}
           </p>
         </div>
-
-        {/* Role Selection */}
-        {step === 0 && (
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-4"
-          >
-            {roles.map((roleOption) => {
-              const Icon = roleOption.icon;
-              return (
-                <motion.button
-                  key={roleOption.id}
-                  onClick={() => handleRoleSelect(roleOption.id)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full p-6 modern-card hover:shadow-2xl transition-all duration-300 text-left ${roleOption.bgColor}`}
-                  style={{ border: '2px solid transparent' }}
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${roleOption.color} rounded-lg flex items-center justify-center`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {roleOption.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {roleOption.description}
-                      </p>
-                    </div>
-                  </div>
-                </motion.button>
-              );
-            })}
-          </motion.div>
-        )}
 
         {/* Phone Number Input */}
         {step === 1 && (
@@ -168,12 +139,6 @@ const LoginPage = () => {
             className="space-y-6"
           >
             <div className="modern-card p-6">
-              <div className="flex items-center justify-center mb-4">
-                <div className={`w-12 h-12 bg-gradient-to-r ${roles.find(r => r.id === role)?.color} rounded-lg flex items-center justify-center`}>
-                  {React.createElement(roles.find(r => r.id === role)?.icon, { className: "w-6 h-6 text-white" })}
-                </div>
-              </div>
-              
               <div className="relative">
                 <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -187,14 +152,7 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="flex space-x-3">
-              <button
-                type="button"
-                onClick={() => setStep(0)}
-                className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                Back
-              </button>
+            <div>
               <button
                 type="submit"
                 disabled={loading || !phone.trim()}
