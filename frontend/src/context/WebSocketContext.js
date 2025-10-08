@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import { useAuth } from './AuthContext';
 
 const WebSocketContext = createContext();
+
+const API_BASE_URL = 'http://localhost:8000';
 
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
@@ -25,17 +28,107 @@ export const WebSocketProvider = ({ children }) => {
   const maxReconnectAttempts = 5;
   const baseReconnectDelay = 1000; // 1 second
 
+  // Load persistent alerts from database on component mount
   useEffect(() => {
     if (isAuthenticated) {
+      loadAlertsFromDatabase();
       connect();
+      
+      // Set up polling as fallback for real-time updates
+      const pollInterval = setInterval(() => {
+        if (isAuthenticated) {
+          loadAlertsFromDatabase();
+        }
+      }, 10000); // Poll every 10 seconds
+      
+      return () => {
+        clearInterval(pollInterval);
+        disconnect();
+      };
     } else {
       disconnect();
+      setAlerts([]);
     }
-
-    return () => {
-      disconnect();
-    };
   }, [isAuthenticated]);
+
+  const loadAlertsFromDatabase = async () => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.get(`${API_BASE_URL}/alerts?status=open`, { headers });
+      
+      // Only update if alerts have changed to prevent unnecessary re-renders
+      const newAlerts = response.data || [];
+      setAlerts(prev => {
+        if (JSON.stringify(prev) !== JSON.stringify(newAlerts)) {
+          console.log(`✅ Loaded ${newAlerts.length} persistent alerts from database`);
+          return newAlerts;
+        }
+        return prev;
+      });
+    } catch (error) {
+      console.error('Failed to load alerts from database:', error);
+      // Don't show error toast for polling failures to avoid spam
+      if (alerts.length === 0) {
+        toast.error('Failed to load recent alerts');
+      }
+    }
+  };
+
+  const markAlertAsDone = async (alertId) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.put(`${API_BASE_URL}/alerts/${alertId}/mark-done`, {}, { headers });
+      
+      if (response.data.success) {
+        // Update local state immediately for responsive UI
+        setAlerts(prev => 
+          prev.map(alert => 
+            alert.id === alertId 
+              ? { ...alert, status: 'done', marked_done_at: new Date().toISOString() }
+              : alert
+          )
+        );
+        
+        toast.success('Alert marked as done!', { icon: '✅' });
+        
+        // Remove from UI after 3 seconds (before auto-delete from server)
+        setTimeout(() => {
+          setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+        }, 3000);
+        
+        // Refresh from database to ensure consistency
+        setTimeout(() => {
+          loadAlertsFromDatabase();
+        }, 1000);
+        
+        return true;
+      }
+    } catch (error) {
+      console.error('Failed to mark alert as done:', error);
+      toast.error('Failed to update alert status');
+      
+      // Refresh from database on error to restore correct state
+      await loadAlertsFromDatabase();
+      return false;
+    }
+  };
+
+  const deleteAlert = async (alertId) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.delete(`${API_BASE_URL}/alerts/${alertId}`, { headers });
+      
+      if (response.data.success) {
+        setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+        toast.success('Alert deleted!', { icon: '🗑️' });
+        return true;
+      }
+    } catch (error) {
+      console.error('Failed to delete alert:', error);
+      toast.error('Failed to delete alert');
+      return false;
+    }
+  };
 
   const connect = () => {
     try {
@@ -156,16 +249,41 @@ export const WebSocketProvider = ({ children }) => {
         });
         break;
 
-      case 'responder_update':
-        setResponders(prev => {
-          const existing = prev.findIndex(r => r.id === data.responder.id);
-          if (existing >= 0) {
-            const updated = [...prev];
-            updated[existing] = { ...updated[existing], ...data.responder };
-            return updated;
-          }
-          return [...prev, data.responder];
-        });
+      case 'alert_status_changed':
+        // Handle comprehensive alert status changes
+        if (data.action === 'marked_done') {
+          setAlerts(prev => {
+            const updatedAlerts = prev.map(alert => 
+              alert.id === data.alert_id 
+                ? { ...alert, status: 'done', marked_done_at: data.marked_done_at }
+                : alert
+            );
+            
+            // Schedule removal from UI after 3 seconds to show completion
+            setTimeout(() => {
+              setAlerts(current => current.filter(alert => alert.id !== data.alert_id));
+            }, 3000);
+            
+            return updatedAlerts;
+          });
+          
+          toast.success('Alert marked as done!', {
+            duration: 3000,
+            icon: '✅',
+          });
+        }
+        break;
+
+      case 'alert_deleted':
+        // Handle alert deletion (immediate removal)
+        setAlerts(prev => prev.filter(alert => alert.id !== data.alert_id));
+        
+        if (data.action === 'auto_deleted') {
+          toast.success('Completed alert automatically removed', {
+            duration: 2000,
+            icon: '🧹',
+          });
+        }
         break;
 
       case 'alert_resolved':
@@ -181,6 +299,25 @@ export const WebSocketProvider = ({ children }) => {
           duration: 3000,
           icon: '✅',
         });
+        break;
+
+      case 'responder_update':
+        setResponders(prev => {
+          const existing = prev.findIndex(r => r.id === data.responder.id);
+          if (existing >= 0) {
+            const updated = [...prev];
+            updated[existing] = { ...updated[existing], ...data.responder };
+            return updated;
+          }
+          return [...prev, data.responder];
+        });
+        break;
+
+      // Legacy support for older message types
+      case 'marked_done':
+      case 'deleted':
+      case 'auto_deleted':
+        // These are handled by the new alert_status_changed and alert_deleted types
         break;
 
       default:
@@ -220,7 +357,11 @@ export const WebSocketProvider = ({ children }) => {
     clearNotification,
     clearAllNotifications,
     setAlerts,
-    setResponders
+    setResponders,
+    // New database-backed functions
+    loadAlertsFromDatabase,
+    markAlertAsDone,
+    deleteAlert
   };
 
   return (

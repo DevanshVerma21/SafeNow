@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Any, List
+from datetime import datetime
 
 
 class OTPRequest(BaseModel):
@@ -22,16 +23,29 @@ class Location(BaseModel):
     lat: float
     lng: float
     accuracy: Optional[float]
+    address: Optional[str] = None
 
 
 class AlertCreate(BaseModel):
-    type: str = Field(..., description='medical | disaster | safety')
+    type: str = Field(..., description='medical | disaster | safety | fire | accident | crime')
     note: Optional[str]
     location: Location
     attachments: Optional[List[Any]] = []
+    severity: Optional[int] = Field(3, ge=1, le=5, description='Severity level 1-5')
 
 
 class AlertOut(AlertCreate):
     id: str
     user_id: str
     status: str
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+    assigned_to: Optional[str] = None
+    verified: Optional[bool] = False
+    marked_done_at: Optional[str] = None
+    resolved_at: Optional[str] = None
+
+
+class AlertStatusUpdate(BaseModel):
+    status: str = Field(..., description='open | assigned | in_progress | done | cancelled')
+    note: Optional[str] = None

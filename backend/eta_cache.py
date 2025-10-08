@@ -1,6 +1,6 @@
 import time
 from typing import Optional
-from . import redis_client
+from backend import redis_client
 
 _CACHE = {}
 _TTL = 60  # seconds

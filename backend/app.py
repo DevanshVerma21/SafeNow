@@ -2,15 +2,16 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPExcept
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
+from datetime import datetime, timedelta
 import uvicorn
-from .auth import create_access_token, verify_token, mock_send_otp, verify_otp_code
-from .schemas import UserCreate, OTPRequest, OTPVerify, AlertCreate, AlertOut
+from backend.auth import create_access_token, verify_token, mock_send_otp, verify_otp_code
+from backend.schemas import UserCreate, OTPRequest, OTPVerify, AlertCreate, AlertOut
 import uuid
 import asyncio
-from .db import database
-from .utils import pick_nearest_responder, estimate_eta_seconds
-from .redis_client import connect_redis, disconnect_redis, publish
-from . import redis_client as redis_client_module
+from backend.db import database
+from backend.utils import pick_nearest_responder, estimate_eta_seconds
+from backend.redis_client import connect_redis, disconnect_redis, publish
+from backend import redis_client as redis_client_module
 import json
 
 
@@ -85,8 +86,11 @@ async def create_alert(a: AlertCreate, user=Depends(get_current_user)):
     alert_id = str(uuid.uuid4())
     alert = a.dict()
     alert.update({"id": alert_id, "user_id": user.get('sub'), "status": "open", "created_at": None})
-    # persist to DB
-    insert_q = "INSERT INTO alerts (id, user_id, type, status, created_at, updated_at, location, verified, verification_method, attachments, note) VALUES (:id, :user_id, :type, :status, now(), now(), :location, false, null, :attachments, :note)"
+    
+    # Always persist to DB first (with fallback to memory for demo)
+    insert_q = """INSERT INTO alerts (id, user_id, type, status, created_at, updated_at, location, 
+                  verified, verification_method, attachments, note, severity) 
+                  VALUES (:id, :user_id, :type, :status, now(), now(), :location, false, null, :attachments, :note, :severity)"""
     try:
         await database.execute(insert_q, values={
             "id": alert_id,
@@ -95,10 +99,13 @@ async def create_alert(a: AlertCreate, user=Depends(get_current_user)):
             "status": alert['status'],
             "location": alert['location'],
             "attachments": alert.get('attachments', []),
-            "note": alert.get('note')
+            "note": alert.get('note'),
+            "severity": alert.get('severity', 3)
         })
-    except Exception:
-        # fallback to in-memory store
+        print(f"✅ Alert {alert_id} successfully saved to database")
+    except Exception as e:
+        print(f"⚠️ Database error, using fallback memory storage: {e}")
+        # fallback to in-memory store for demo
         ALERTS[alert_id] = alert
 
     # broadcast to connected websockets
@@ -183,8 +190,181 @@ async def schedule_auto_assign(alert_id: str, delay: int = 30):
 
 
 @app.get('/alerts')
-async def list_alerts():
-    return list(ALERTS.values())
+async def list_alerts(status: str = "open"):
+    """Get all alerts with optional status filter. Defaults to open alerts only."""
+    try:
+        # Always fetch from database for single source of truth
+        if status == "open":
+            query = "SELECT * FROM alerts WHERE status IN ('open', 'assigned', 'in_progress') ORDER BY created_at DESC"
+        else:
+            query = "SELECT * FROM alerts ORDER BY created_at DESC"
+        
+        rows = await database.fetch_all(query)
+        alerts = [dict(row) for row in rows]
+        print(f"✅ Retrieved {len(alerts)} alerts from database (status filter: {status})")
+        
+        # Convert datetime objects to ISO strings for JSON serialization
+        for alert in alerts:
+            for field in ['created_at', 'updated_at', 'resolved_at', 'marked_done_at', 'auto_delete_at']:
+                if alert.get(field):
+                    alert[field] = alert[field].isoformat()
+        
+        return alerts
+    except Exception as e:
+        print(f"⚠️ Database error, using fallback memory storage: {e}")
+        # Fallback to in-memory storage
+        if status == "open":
+            return [alert for alert in ALERTS.values() if alert.get('status') in ['open', 'assigned', 'in_progress']]
+        return list(ALERTS.values())
+
+
+@app.put('/alerts/{alert_id}/mark-done')
+async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
+    """Mark an alert as done by a responder."""
+    try:
+        # First, get the current alert details
+        alert_query = "SELECT * FROM alerts WHERE id = :alert_id"
+        alert_row = await database.fetch_one(alert_query, values={"alert_id": alert_id})
+        
+        if not alert_row:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        
+        # Update in database
+        marked_time = datetime.utcnow()
+        auto_delete_time = marked_time + timedelta(seconds=10)  # Auto-delete after 10 seconds
+        
+        update_query = """UPDATE alerts 
+                         SET status = 'done', 
+                             marked_done_at = :marked_time,
+                             auto_delete_at = :auto_delete_time,
+                             updated_at = now()
+                         WHERE id = :alert_id"""
+        
+        result = await database.execute(update_query, values={
+            "alert_id": alert_id,
+            "marked_time": marked_time,
+            "auto_delete_time": auto_delete_time
+        })
+        
+        if result:
+            print(f"✅ Alert {alert_id} marked as done by user {user.get('sub', 'unknown')}")
+            
+            # Schedule automatic deletion
+            asyncio.create_task(auto_delete_alert(alert_id, 10))
+            
+            # Get updated alert data for broadcasting
+            updated_alert = dict(alert_row)
+            updated_alert.update({
+                "status": "done",
+                "marked_done_at": marked_time.isoformat(),
+                "auto_delete_at": auto_delete_time.isoformat()
+            })
+            
+            # Broadcast comprehensive update to all connected clients
+            broadcast_data = {
+                "type": "alert_status_changed",
+                "action": "marked_done",
+                "alert": updated_alert,
+                "alert_id": alert_id,
+                "status": "done",
+                "marked_done_at": marked_time.isoformat(),
+                "marked_by": user.get('sub', 'unknown')
+            }
+            await broadcast_alert(broadcast_data)
+            
+            return {
+                "success": True, 
+                "message": "Alert marked as done", 
+                "alert_id": alert_id,
+                "status": "done",
+                "marked_done_at": marked_time.isoformat(),
+                "auto_delete_in_seconds": 10
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Alert not found or already processed")
+            
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        if alert_id in ALERTS:
+            ALERTS[alert_id]['status'] = 'done'
+            ALERTS[alert_id]['marked_done_at'] = datetime.utcnow().isoformat()
+            
+            # Broadcast fallback update
+            broadcast_data = {
+                "type": "alert_status_changed",
+                "action": "marked_done",
+                "alert_id": alert_id,
+                "status": "done",
+                "marked_done_at": ALERTS[alert_id]['marked_done_at']
+            }
+            await broadcast_alert(broadcast_data)
+            
+            asyncio.create_task(auto_delete_alert_memory(alert_id, 10))
+            return {"success": True, "message": "Alert marked as done (memory)", "alert_id": alert_id}
+        else:
+            raise HTTPException(status_code=404, detail="Alert not found")
+
+
+@app.delete('/alerts/{alert_id}')
+async def delete_alert(alert_id: str, user=Depends(get_current_user)):
+    """Manually delete an alert."""
+    try:
+        # Delete from database
+        delete_query = "DELETE FROM alerts WHERE id = :alert_id"
+        result = await database.execute(delete_query, values={"alert_id": alert_id})
+        
+        if result:
+            print(f"✅ Alert {alert_id} deleted from database")
+            
+            # Broadcast deletion to all clients
+            alert_update = {
+                "id": alert_id,
+                "action": "deleted"
+            }
+            await broadcast_alert(alert_update)
+            
+            return {"success": True, "message": "Alert deleted", "alert_id": alert_id}
+        else:
+            raise HTTPException(status_code=404, detail="Alert not found")
+            
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        if alert_id in ALERTS:
+            del ALERTS[alert_id]
+            return {"success": True, "message": "Alert deleted (memory)", "alert_id": alert_id}
+        else:
+            raise HTTPException(status_code=404, detail="Alert not found")
+
+
+async def auto_delete_alert(alert_id: str, delay_seconds: int = 10):
+    """Auto-delete alert after specified delay."""
+    await asyncio.sleep(delay_seconds)
+    try:
+        delete_query = "DELETE FROM alerts WHERE id = :alert_id AND status = 'done'"
+        result = await database.execute(delete_query, values={"alert_id": alert_id})
+        if result:
+            print(f"🗑️ Auto-deleted alert {alert_id} from database")
+            
+            # Broadcast deletion to all clients for real-time sync
+            broadcast_data = {
+                "type": "alert_deleted",
+                "action": "auto_deleted",
+                "alert_id": alert_id,
+                "deleted_at": datetime.utcnow().isoformat()
+            }
+            await broadcast_alert(broadcast_data)
+    except Exception as e:
+        print(f"⚠️ Auto-delete error: {e}")
+
+
+async def auto_delete_alert_memory(alert_id: str, delay_seconds: int = 10):
+    """Auto-delete alert from memory after specified delay."""
+    await asyncio.sleep(delay_seconds)
+    if alert_id in ALERTS and ALERTS[alert_id].get('status') == 'done':
+        del ALERTS[alert_id]
+        print(f"🗑️ Auto-deleted alert {alert_id} from memory")
 
 
 @app.websocket('/ws/alerts')
@@ -388,6 +568,63 @@ async def broadcast_alert(alert: dict):
     # publish to redis channel for other instances
     try:
         await publish('alerts', json.dumps({"type": "new_alert", "alert": alert_out}))
+    except Exception:
+        pass
+
+
+async def periodic_cleanup():
+    """Background task to clean up alerts scheduled for deletion."""
+    while True:
+        try:
+            await asyncio.sleep(30)  # Check every 30 seconds
+            
+            # Clean up alerts that are past their auto_delete_at time
+            cleanup_query = """DELETE FROM alerts 
+                             WHERE auto_delete_at IS NOT NULL 
+                             AND auto_delete_at <= now()"""
+            
+            result = await database.execute(cleanup_query)
+            if result and result > 0:
+                print(f"🧹 Cleaned up {result} expired alerts from database")
+                
+        except Exception as e:
+            print(f"⚠️ Cleanup task error: {e}")
+            await asyncio.sleep(60)  # Wait longer on error
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database and start background tasks."""
+    try:
+        await database.connect()
+        print("✅ Database connected")
+    except Exception as e:
+        print(f"⚠️ Database connection failed: {e}")
+        print("🔄 Continuing in demo mode with in-memory storage")
+    
+    try:
+        await connect_redis()
+        print("✅ Redis connected")
+    except Exception as e:
+        print(f"⚠️ Redis connection failed: {e}")
+    
+    # Start background cleanup task
+    asyncio.create_task(periodic_cleanup())
+    print("🧹 Started periodic cleanup task")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Clean up connections on shutdown."""
+    try:
+        await database.disconnect()
+        print("✅ Database disconnected")
+    except Exception:
+        pass
+    
+    try:
+        await disconnect_redis()
+        print("✅ Redis disconnected")
     except Exception:
         pass
 

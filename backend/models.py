@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, String, Boolean, DateTime, JSON, ForeignKey
+from sqlalchemy import Table, Column, String, Boolean, DateTime, JSON, ForeignKey, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from sqlalchemy import MetaData
@@ -23,17 +23,22 @@ alerts = Table(
     'alerts', metadata,
     Column('id', UUID(as_uuid=True), primary_key=True),
     Column('user_id', UUID(as_uuid=True), ForeignKey('users.id')),
-    Column('type', String),
-    Column('status', String, default='open'),
+    Column('type', String),  # medical, disaster, safety, fire, accident, crime
+    Column('status', String, default='open'),  # open, assigned, in_progress, done, cancelled
     Column('created_at', DateTime(timezone=True), server_default=func.now()),
     Column('updated_at', DateTime(timezone=True), server_default=func.now(), onupdate=func.now()),
-    Column('location', JSON),
+    Column('location', JSON),  # {lat, lng, accuracy, address}
     Column('verified', Boolean, default=False),
     Column('verification_method', String),
     Column('attachments', JSON),
     Column('note', String),
     Column('assigned_to', UUID(as_uuid=True)),
-    Column('route_trace', JSON)
+    Column('route_trace', JSON),
+    Column('severity', Integer, default=3),  # 1-5 scale
+    Column('eta_minutes', Integer),
+    Column('resolved_at', DateTime(timezone=True)),
+    Column('marked_done_at', DateTime(timezone=True)),  # When marked as done
+    Column('auto_delete_at', DateTime(timezone=True))   # Scheduled deletion time
 )
 
 responders = Table(

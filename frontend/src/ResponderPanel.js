@@ -1,63 +1,257 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useWebSocket } from './context/WebSocketContext';
+import toast from 'react-hot-toast';
 
 const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
 
-export default function ResponderPanel({alerts, onResponderRegistered}){
+export default function ResponderPanel({ onResponderRegistered }) {
   const [status, setStatus] = useState('available');
   const [responderId, setResponderId] = useState(null);
   const [lat, setLat] = useState('');
   const [lng, setLng] = useState('');
+  const { alerts, markAlertAsDone, loadAlertsFromDatabase } = useWebSocket();
 
-  async function register(){
-    const payload = {user_id: 'demo_responder', responder_type: 'volunteer', status, location: {lat: parseFloat(lat), lng: parseFloat(lng)}};
-    const res = await axios.post(`${API_BASE}/responders/heartbeat`, payload);
-    setResponderId(res.data.id);
-    if(onResponderRegistered) onResponderRegistered(res.data.id);
+  // Refresh alerts when component mounts and periodically
+  useEffect(() => {
+    loadAlertsFromDatabase();
+    
+    const interval = setInterval(() => {
+      loadAlertsFromDatabase();
+    }, 10000); // Refresh every 10 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  async function register() {
+    try {
+      const payload = {
+        user_id: 'demo_responder',
+        responder_type: 'volunteer',
+        status,
+        location: { lat: parseFloat(lat), lng: parseFloat(lng) }
+      };
+      const res = await axios.post(`${API_BASE}/responders/heartbeat`, payload);
+      setResponderId(res.data.id);
+      if (onResponderRegistered) onResponderRegistered(res.data.id);
+      toast.success('Responder registered successfully!');
+    } catch (error) {
+      console.error('Failed to register responder:', error);
+      toast.error('Failed to register responder');
+    }
   }
 
-  async function accept(alert_id){
-    if(!responderId) return alert('Register first');
-    await axios.post(`${API_BASE}/responders/${responderId}/accept`, {alert_id});
+  async function accept(alert_id) {
+    if (!responderId) {
+      toast.error('Please register first');
+      return;
+    }
+    try {
+      await axios.post(`${API_BASE}/responders/${responderId}/accept`, { alert_id });
+      toast.success('Alert accepted!');
+      // Refresh alerts to get updated status
+      loadAlertsFromDatabase();
+    } catch (error) {
+      console.error('Failed to accept alert:', error);
+      toast.error('Failed to accept alert');
+    }
   }
 
-  async function decline(alert_id){
-    if(!responderId) return alert('Register first');
-    await axios.post(`${API_BASE}/responders/${responderId}/decline`, {alert_id});
+  async function decline(alert_id) {
+    if (!responderId) {
+      toast.error('Please register first');
+      return;
+    }
+    try {
+      await axios.post(`${API_BASE}/responders/${responderId}/decline`, { alert_id });
+      toast.success('Alert declined');
+      // Refresh alerts to get updated status
+      loadAlertsFromDatabase();
+    } catch (error) {
+      console.error('Failed to decline alert:', error);
+      toast.error('Failed to decline alert');
+    }
   }
 
-  const assigned = alerts.filter(a=> a.assigned_to && a.assigned_to === responderId);
+  const handleMarkAsDone = async (alertId) => {
+    const success = await markAlertAsDone(alertId);
+    if (success) {
+      // Force refresh to ensure consistency
+      setTimeout(() => loadAlertsFromDatabase(), 1000);
+    }
+  };
+
+  // Filter alerts to show all open alerts (not just assigned ones)
+  const openAlerts = alerts.filter(a => ['open', 'assigned', 'in_progress'].includes(a.status));
+  const assigned = openAlerts.filter(a => a.assigned_to && a.assigned_to === responderId);
 
   return (
-    <div style={{border:'1px solid #ccc', padding:10, marginTop:10}}>
-      <h4>Responder Panel</h4>
-      <div>
-        <label>Lat: <input value={lat} onChange={e=>setLat(e.target.value)} /></label>
-        <label style={{marginLeft:10}}>Lng: <input value={lng} onChange={e=>setLng(e.target.value)} /></label>
-        <label style={{marginLeft:10}}>Status:
-          <select value={status} onChange={e=>setStatus(e.target.value)}>
-            <option value="available">available</option>
-            <option value="busy">busy</option>
-            <option value="offline">offline</option>
-          </select>
-        </label>
-        <button onClick={register} style={{marginLeft:10}}>Register Heartbeat</button>
+    <div style={{ border: '1px solid #ccc', padding: 20, marginTop: 10, borderRadius: 8 }}>
+      <h4 style={{ marginBottom: 15, color: '#333' }}>Emergency Responder Panel</h4>
+      
+      {/* Registration Section */}
+      <div style={{ marginBottom: 20, padding: 15, backgroundColor: '#f8f9fa', borderRadius: 6 }}>
+        <h5 style={{ marginBottom: 10 }}>Responder Registration</h5>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <label>
+            Lat: <input 
+              value={lat} 
+              onChange={e => setLat(e.target.value)}
+              placeholder="Latitude"
+              style={{ marginLeft: 5, padding: 4 }}
+            />
+          </label>
+          <label>
+            Lng: <input 
+              value={lng} 
+              onChange={e => setLng(e.target.value)}
+              placeholder="Longitude"
+              style={{ marginLeft: 5, padding: 4 }}
+            />
+          </label>
+          <label>
+            Status:
+            <select value={status} onChange={e => setStatus(e.target.value)} style={{ marginLeft: 5, padding: 4 }}>
+              <option value="available">Available</option>
+              <option value="busy">Busy</option>
+              <option value="offline">Offline</option>
+            </select>
+          </label>
+          <button 
+            onClick={register}
+            style={{ 
+              padding: '6px 12px', 
+              backgroundColor: '#007bff', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: 4,
+              cursor: 'pointer'
+            }}
+          >
+            Register/Update
+          </button>
+        </div>
+        <div style={{ marginTop: 10, fontSize: '14px' }}>
+          <strong>Responder ID:</strong> {responderId || 'Not registered'}
+        </div>
       </div>
-      <div style={{marginTop:10}}>
-        <strong>Responder ID:</strong> {responderId || 'not registered'}
+
+      {/* All Open Alerts Section */}
+      <div style={{ marginBottom: 20 }}>
+        <h5 style={{ marginBottom: 10, color: '#dc3545' }}>
+          All Open Emergency Alerts ({openAlerts.length})
+        </h5>
+        {openAlerts.length === 0 ? (
+          <div style={{ padding: 15, backgroundColor: '#e8f5e8', borderRadius: 6, color: '#2d5a2d' }}>
+            ✅ No active emergency alerts
+          </div>
+        ) : (
+          <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+            {openAlerts.map(alert => (
+              <div 
+                key={alert.id} 
+                style={{ 
+                  padding: 12, 
+                  margin: '8px 0', 
+                  border: '1px solid #ddd',
+                  borderRadius: 6,
+                  backgroundColor: alert.assigned_to === responderId ? '#e7f3ff' : '#fff5f5'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1 }}>
+                    <strong style={{ color: '#dc3545' }}>
+                      {alert.type?.toUpperCase()} EMERGENCY
+                    </strong>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                      Location: {alert.location?.lat?.toFixed(4)}, {alert.location?.lng?.toFixed(4)}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#666' }}>
+                      Status: <strong>{alert.status}</strong>
+                    </div>
+                    {alert.note && (
+                      <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                        Note: {alert.note}
+                      </div>
+                    )}
+                    {alert.assigned_to === responderId && (
+                      <div style={{ fontSize: '12px', color: '#0066cc', marginTop: 4 }}>
+                        ✅ Assigned to you
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {!alert.assigned_to && (
+                      <button 
+                        onClick={() => accept(alert.id)}
+                        disabled={!responderId}
+                        style={{ 
+                          padding: '4px 8px', 
+                          backgroundColor: '#28a745',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 4,
+                          fontSize: '12px',
+                          cursor: responderId ? 'pointer' : 'not-allowed',
+                          opacity: responderId ? 1 : 0.5
+                        }}
+                      >
+                        Accept
+                      </button>
+                    )}
+                    
+                    {alert.assigned_to === responderId && (
+                      <>
+                        <button 
+                          onClick={() => decline(alert.id)}
+                          style={{ 
+                            padding: '4px 8px', 
+                            backgroundColor: '#6c757d',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 4,
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Decline
+                        </button>
+                        <button 
+                          onClick={() => handleMarkAsDone(alert.id)}
+                          style={{ 
+                            padding: '4px 8px', 
+                            backgroundColor: '#17a2b8',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: 4,
+                            fontSize: '12px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Mark Done
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-      <div style={{marginTop:10}}>
-        <h5>Assigned Alerts</h5>
-        {assigned.length===0 && <div>No assigned alerts</div>}
-        <ul>
-          {assigned.map(a=> (
-            <li key={a.id}>{a.type} @ {a.location?.lat},{a.location?.lng} - {a.status}
-              <button onClick={()=>accept(a.id)} style={{marginLeft:8}}>Accept</button>
-              <button onClick={()=>decline(a.id)} style={{marginLeft:8}}>Decline</button>
-            </li>
-          ))}
-        </ul>
+
+      {/* Assigned Alerts Summary */}
+      <div style={{ padding: 15, backgroundColor: '#f0f8ff', borderRadius: 6 }}>
+        <h5 style={{ marginBottom: 10 }}>My Assigned Alerts</h5>
+        {assigned.length === 0 ? (
+          <div style={{ fontSize: '14px', color: '#666' }}>No alerts assigned to you</div>
+        ) : (
+          <div style={{ fontSize: '14px' }}>
+            You have <strong>{assigned.length}</strong> alert(s) assigned to you
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }

@@ -2,7 +2,7 @@ import math
 from typing import Dict, Any, Optional
 import os
 import requests
-from .eta_cache import get_cached, set_cached, get_cached_redis, set_cached_redis
+from backend.eta_cache import get_cached, set_cached, get_cached_redis, set_cached_redis
 
 GOOGLE_DIRECTIONS_KEY = os.environ.get('GOOGLE_DIRECTIONS_KEY')
 

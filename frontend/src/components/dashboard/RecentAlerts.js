@@ -1,25 +1,32 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useWebSocket } from '../../context/WebSocketContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   ExclamationTriangleIcon,
   ClockIcon,
   MapPinIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
 const RecentAlerts = () => {
-  const { alerts } = useWebSocket();
+  const { alerts, markAlertAsDone } = useWebSocket();
+  const { user } = useAuth();
+
+  const isResponder = user?.role === 'responder' || user?.role === 'admin';
 
   const getStatusIcon = (status) => {
     switch (status) {
       case 'resolved':
+      case 'done':
         return CheckCircleIcon;
       case 'cancelled':
         return XCircleIcon;
       case 'assigned':
+      case 'in_progress':
         return ClockIcon;
       default:
         return ExclamationTriangleIcon;
@@ -29,10 +36,12 @@ const RecentAlerts = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'resolved':
+      case 'done':
         return 'text-green-600 bg-green-50 border-green-200';
       case 'cancelled':
         return 'text-gray-600 bg-gray-50 border-gray-200';
       case 'assigned':
+      case 'in_progress':
         return 'text-blue-600 bg-blue-50 border-blue-200';
       default:
         return 'text-red-600 bg-red-50 border-red-200';
@@ -46,12 +55,23 @@ const RecentAlerts = () => {
       'police': '👮‍♂️',
       'safety': '🛡️',
       'accident': '🚗',
+      'disaster': '🌪️',
+      'crime': '🚔',
       'other': '⚠️'
     };
     return icons[type] || '⚠️';
   };
 
-  const recentAlerts = alerts.slice(0, 5); // Show latest 5 alerts
+  const handleMarkAsDone = async (alertId) => {
+    const success = await markAlertAsDone(alertId);
+    if (success) {
+      console.log(`Alert ${alertId} marked as done`);
+    }
+  };
+
+  // Filter to show only open alerts
+  const openAlerts = alerts.filter(alert => alert.status === 'open' || alert.status === 'assigned' || alert.status === 'in_progress');
+  const recentAlerts = openAlerts.slice(0, 5); // Show latest 5 open alerts
 
   return (
     <div className="modern-card p-6">
@@ -151,6 +171,29 @@ const RecentAlerts = () => {
                         )}
                       </div>
                     )}
+
+                    {/* Responder Actions */}
+                    {isResponder && (alert.status === 'open' || alert.status === 'assigned' || alert.status === 'in_progress') && (
+                      <div className="mt-3 flex items-center justify-between">
+                        <div className="text-xs text-gray-500">
+                          Responder Actions:
+                        </div>
+                        <button
+                          onClick={() => handleMarkAsDone(alert.id)}
+                          className="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors duration-200"
+                        >
+                          <CheckIcon className="w-3 h-3 mr-1" />
+                          Mark as Done
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Status indicator for done alerts */}
+                    {alert.status === 'done' && (
+                      <div className="mt-2 p-2 bg-green-50 rounded text-xs text-green-700">
+                        ✅ Alert completed - will be automatically removed
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -160,10 +203,10 @@ const RecentAlerts = () => {
       )}
 
       {/* View All Button */}
-      {alerts.length > 5 && (
+      {openAlerts.length > 5 && (
         <div className="mt-4 text-center">
           <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            View All Alerts ({alerts.length})
+            View All Open Alerts ({openAlerts.length})
           </button>
         </div>
       )}
