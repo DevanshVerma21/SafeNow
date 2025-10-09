@@ -162,5 +162,12 @@
     "name": "User",
     "role": "citizen",
     "is_verified": true
+  },
+  "+91-9876543213": {
+    "id": "3d618d90-f42a-41da-a617-c2eb9b5695a9",
+    "phone": "+91-9876543213",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
   }
 }

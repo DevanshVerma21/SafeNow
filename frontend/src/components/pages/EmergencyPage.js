@@ -33,7 +33,9 @@ const EmergencyPage = () => {
       title: 'Medical Emergency',
       description: 'Heart attack, accident, severe injury',
       color: 'from-red-500 to-red-600',
-      urgency: 'critical'
+      urgency: 'critical',
+      emergencyNumber: '102', // Ambulance
+      serviceType: 'Ambulance Service'
     },
     {
       type: 'fire',
@@ -41,7 +43,9 @@ const EmergencyPage = () => {
       title: 'Fire Emergency',
       description: 'Building fire, forest fire, gas leak',
       color: 'from-orange-500 to-red-500',
-      urgency: 'critical'
+      urgency: 'critical',
+      emergencyNumber: '101', // Fire Department
+      serviceType: 'Fire Department'
     },
     {
       type: 'security',
@@ -49,7 +53,9 @@ const EmergencyPage = () => {
       title: 'Security Threat',
       description: 'Theft, assault, suspicious activity',
       color: 'from-blue-500 to-blue-600',
-      urgency: 'high'
+      urgency: 'high',
+      emergencyNumber: '100', // Police
+      serviceType: 'Police'
     },
     {
       type: 'general',
@@ -57,7 +63,9 @@ const EmergencyPage = () => {
       title: 'General Emergency',
       description: 'Other urgent situations requiring help',
       color: 'from-purple-500 to-purple-600',
-      urgency: 'medium'
+      urgency: 'medium',
+      emergencyNumber: '112', // Universal Emergency Number
+      serviceType: 'Emergency Services'
     }
   ];
 
@@ -71,6 +79,11 @@ const EmergencyPage = () => {
       return;
     }
 
+    if (!user || !user.id) {
+      toast.error('Please login to send emergency alerts');
+      return;
+    }
+
     setIsSubmittingAlert(true);
     
     try {
@@ -81,8 +94,8 @@ const EmergencyPage = () => {
         description: `Emergency assistance needed: ${emergencyType.description}`,
         location: currentLocation,
         userId: user.id,
-        userName: user.name,
-        userPhone: user.phone,
+        userName: user.name || 'User',
+        userPhone: user.phone || 'N/A',
         timestamp: new Date().toISOString(),
         urgency: emergencyType.urgency,
         status: 'active',
@@ -90,9 +103,13 @@ const EmergencyPage = () => {
         audio_url: null
       };
 
+      console.log('Sending alert with data:', alertData);
+
       // Send alert via WebSocket
       const response = await sendAlert(alertData);
-      const alertId = response?.alert_id || Date.now(); // Fallback to timestamp if no ID returned
+      console.log('Alert response:', response);
+      
+      const alertId = response?.alert_id || response?.alert?.id || Date.now(); // Fallback to timestamp if no ID returned
 
       // Upload media if captured
       if (capturedMedia.hasMedia) {
@@ -124,12 +141,56 @@ const EmergencyPage = () => {
         toast.success(`${emergencyType.title} alert sent successfully!`);
       }
       
-      // Auto-call emergency services for critical emergencies
-      if (emergencyType.urgency === 'critical') {
+      // Auto-call appropriate emergency service based on type
+      const callEmergencyService = () => {
+        toast.success(
+          `📞 Connecting to ${emergencyType.serviceType} (${emergencyType.emergencyNumber})...`,
+          { 
+            duration: 3000,
+            icon: '🚨'
+          }
+        );
+        
+        // Attempt to initiate call
         setTimeout(() => {
-          toast.success('Connecting to emergency services (100)...');
-          window.location.href = 'tel:100';
-        }, 2000);
+          window.location.href = `tel:${emergencyType.emergencyNumber}`;
+        }, 1500);
+      };
+
+      // Different actions based on emergency type
+      switch (emergencyType.type) {
+        case 'medical':
+          // Critical - immediate ambulance call
+          toast.success('🚑 Dispatching ambulance to your location!', { duration: 4000 });
+          setTimeout(callEmergencyService, 2000);
+          break;
+          
+        case 'fire':
+          // Critical - immediate fire department call
+          toast.success('🚒 Fire department has been notified!', { duration: 4000 });
+          setTimeout(callEmergencyService, 2000);
+          break;
+          
+        case 'security':
+          // High priority - police notification
+          toast.success('🚓 Police have been alerted to your location!', { duration: 4000 });
+          setTimeout(callEmergencyService, 2500);
+          break;
+          
+        case 'general':
+          // Medium priority - prompt user for call
+          setTimeout(() => {
+            if (window.confirm('Would you like to call emergency services (112) now?')) {
+              callEmergencyService();
+            } else {
+              toast.success('Alert sent. You can call 112 anytime if needed.', { duration: 4000 });
+            }
+          }, 2000);
+          break;
+          
+        default:
+          // Fallback to general emergency number
+          setTimeout(callEmergencyService, 2000);
       }
       
     } catch (error) {

@@ -18,6 +18,7 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
   const [recordingTime, setRecordingTime] = useState(0);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [stream, setStream] = useState(null);
+  const [cameraError, setCameraError] = useState(null);
 
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -26,20 +27,56 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
 
   // Initialize camera
   const startCamera = async () => {
+    setCameraError(null);
     try {
+      console.log('🎥 Requesting camera access...');
+      
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: { 
+          facingMode: 'environment', 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 } 
+        },
         audio: false
       });
+      
+      console.log('✅ Camera access granted', mediaStream);
+      console.log('📹 Video tracks:', mediaStream.getVideoTracks());
+      
       setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
       setIsCameraOpen(true);
+      
+      // Wait for next tick to ensure video element is rendered
+      setTimeout(() => {
+        if (videoRef.current) {
+          console.log('📺 Setting video source...');
+          videoRef.current.srcObject = mediaStream;
+          
+          // Add event listeners
+          videoRef.current.onloadedmetadata = () => {
+            console.log('✅ Video metadata loaded');
+            videoRef.current.play().catch(err => {
+              console.error('❌ Error playing video:', err);
+              setCameraError('Failed to play video');
+            });
+          };
+          
+          videoRef.current.onerror = (err) => {
+            console.error('❌ Video element error:', err);
+            setCameraError('Video element error');
+          };
+        } else {
+          console.error('❌ Video ref not found');
+          setCameraError('Video element not ready');
+        }
+      }, 100);
+      
       toast.success('Camera ready!');
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error('❌ Error accessing camera:', error);
+      setCameraError(error.message);
       toast.error('Cannot access camera. Please check permissions.');
+      setIsCameraOpen(false);
     }
   };
 
@@ -77,8 +114,17 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
             dataUrl: reader.result,
             timestamp: new Date().toISOString()
           };
+          const newPhotoCount = photos.length + 1;
           setPhotos(prev => [...prev, newPhoto]);
-          toast.success(`Photo ${photos.length + 1} captured!`);
+          toast.success(`Photo ${newPhotoCount} captured!`);
+          
+          // Auto-close camera after capturing max photos
+          if (newPhotoCount >= maxPhotos) {
+            setTimeout(() => {
+              stopCamera();
+              toast.success(`${maxPhotos} photos captured! Camera closed.`);
+            }, 500);
+          }
         };
         reader.onerror = (error) => {
           console.error('Error reading photo:', error);
@@ -330,40 +376,67 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
         </div>
 
         {/* Camera View */}
-        <AnimatePresence>
-          {isCameraOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-4"
-            >
-              <div className="relative bg-black rounded-xl overflow-hidden">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full h-64 object-cover"
-                />
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={capturePhoto}
-                    disabled={photos.length >= maxPhotos}
-                    className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl ${
-                      photos.length >= maxPhotos
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-white hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="w-12 h-12 rounded-full border-4 border-gray-800"></div>
-                  </motion.button>
+        {isCameraOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-4"
+          >
+            <div className="relative bg-black rounded-xl overflow-hidden" style={{ minHeight: '300px' }}>
+              {/* Camera Status Debug */}
+              {cameraError && (
+                <div className="absolute top-2 left-2 right-2 bg-red-500 text-white p-2 rounded text-xs z-10">
+                  Error: {cameraError}
                 </div>
+              )}
+              
+              {stream && (
+                <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-xs z-10">
+                  ● Live
+                </div>
+              )}
+              
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="w-full h-64 object-cover bg-gray-900"
+                style={{ display: 'block', minHeight: '256px' }}
+              />
+              
+              {/* Capture Button */}
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={capturePhoto}
+                  disabled={photos.length >= maxPhotos}
+                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl ${
+                    photos.length >= maxPhotos
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-white hover:bg-gray-100'
+                  }`}
+                  title={photos.length >= maxPhotos ? 'Maximum photos reached' : 'Capture photo'}
+                >
+                  <div className="w-12 h-12 rounded-full border-4 border-gray-800"></div>
+                </motion.button>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              
+              {/* Loading indicator */}
+              {!stream && !cameraError && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-2"></div>
+                    <p>Loading camera...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Captured Photos Grid */}
         {photos.length > 0 && (
