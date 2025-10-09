@@ -138,16 +138,27 @@ const LoginPage = () => {
             onSubmit={handleRequestOTP}
             className="space-y-6"
           >
-            <div className="modern-card p-6">
+            <div className="bg-white rounded-xl p-6 shadow-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
               <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                 <input
                   type="tel"
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="modern-input w-full pl-12 pr-4"
-                  placeholder="Enter your phone number"
+                  onChange={(e) => {
+                    console.log('Input changed:', e.target.value);
+                    setPhone(e.target.value);
+                  }}
+                  onClick={() => console.log('Input clicked')}
+                  onFocus={() => console.log('Input focused')}
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  placeholder="+1234567890"
+                  autoComplete="tel"
+                  autoFocus
+                  style={{ pointerEvents: 'auto', userSelect: 'text' }}
                 />
               </div>
             </div>
@@ -156,7 +167,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={loading || !phone.trim()}
-                className="modern-button flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? (
                   <div className="flex items-center justify-center">
