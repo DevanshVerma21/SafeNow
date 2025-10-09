@@ -258,6 +258,51 @@ const AlertPanel = ({ isOpen, onClose }) => {
                           <span>{formatTimestamp(alert.timestamp)}</span>
                         </div>
 
+                        {/* Media Attachments */}
+                        {(alert.photo_urls?.length > 0 || alert.audio_url) && (
+                          <div className="bg-purple-50 p-3 rounded-xl space-y-2">
+                            <p className="text-xs font-semibold text-purple-700">📎 Media Evidence:</p>
+                            
+                            {/* Photo Thumbnails */}
+                            {alert.photo_urls?.length > 0 && (
+                              <div className="flex gap-2 flex-wrap">
+                                {alert.photo_urls.map((photoUrl, photoIndex) => (
+                                  <a
+                                    key={photoIndex}
+                                    href={`http://localhost:8000${photoUrl}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative"
+                                  >
+                                    <img
+                                      src={`http://localhost:8000${photoUrl}`}
+                                      alt={`Evidence ${photoIndex + 1}`}
+                                      className="w-20 h-20 object-cover rounded-lg border-2 border-purple-300 group-hover:border-purple-500 transition-all shadow-sm"
+                                    />
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all flex items-center justify-center">
+                                      <span className="text-white text-xs font-semibold opacity-0 group-hover:opacity-100">View</span>
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Audio Player */}
+                            {alert.audio_url && (
+                              <div className="bg-white rounded-lg p-2 border border-purple-200">
+                                <audio
+                                  controls
+                                  className="w-full h-8"
+                                  style={{ maxHeight: '32px' }}
+                                >
+                                  <source src={`http://localhost:8000${alert.audio_url}`} type="audio/webm" />
+                                  Your browser does not support audio playback.
+                                </audio>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {/* Map Actions */}
                         <div className="grid grid-cols-2 gap-2">
                           <motion.button

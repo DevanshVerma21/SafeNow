@@ -1,6 +1,8 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, UploadFile, File, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from typing import List
 from datetime import datetime, timedelta
 import uvicorn
@@ -12,6 +14,15 @@ from backend.db import database
 from backend.utils import pick_nearest_responder, estimate_eta_seconds
 from backend.redis_client import connect_redis, disconnect_redis, publish
 from backend import redis_client as redis_client_module
+from backend.media_service import (
+    save_photo,
+    save_audio,
+    cleanup_expired_media,
+    get_media_for_alert,
+    get_all_media_stats,
+    PHOTOS_DIR,
+    AUDIO_DIR
+)
 from backend.demo_data import (
     initialize_demo_data, 
     load_alerts, 
@@ -39,6 +50,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount media directories for serving uploaded files
+import os
+if os.path.exists(PHOTOS_DIR):
+    app.mount("/media/photos", StaticFiles(directory=PHOTOS_DIR), name="photos")
+if os.path.exists(AUDIO_DIR):
+    app.mount("/media/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -170,6 +188,65 @@ async def verify_otp(v: OTPVerify):
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     payload = verify_token(token)
     return payload
+
+
+@app.post('/alerts/upload_media')
+async def upload_media(
+    alert_id: str = Body(...),
+    photos: List[str] = Body(default=[]),
+    audio: str = Body(default=None),
+    user=Depends(get_current_user)
+):
+    """
+    Upload photos and audio for an alert
+    Photos and audio are base64 encoded strings
+    """
+    try:
+        saved_photos = []
+        saved_audio = None
+        
+        # Save photos
+        for photo_data in photos:
+            if photo_data:
+                photo_info = await save_photo(photo_data, alert_id)
+                saved_photos.append(photo_info['url'])
+        
+        # Save audio
+        if audio:
+            audio_info = await save_audio(audio, alert_id)
+            saved_audio = audio_info['url']
+        
+        return {
+            'status': 'success',
+            'photo_urls': saved_photos,
+            'audio_url': saved_audio,
+            'message': f'Uploaded {len(saved_photos)} photos and {"1 audio" if saved_audio else "no audio"}'
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get('/alerts/{alert_id}/media')
+async def get_alert_media(alert_id: str, user=Depends(get_current_user)):
+    """Get all media files for an alert"""
+    try:
+        media = get_media_for_alert(alert_id)
+        return media
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get('/media/stats')
+async def get_media_stats(user=Depends(get_current_user)):
+    """Get statistics about stored media (admin only)"""
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail='Admin access required')
+    
+    try:
+        stats = get_all_media_stats()
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post('/alerts', response_model=AlertOut)
@@ -1178,6 +1255,10 @@ async def startup():
     # Start background cleanup task
     asyncio.create_task(periodic_cleanup())
     print("🧹 Started periodic cleanup task")
+    
+    # Start media cleanup task (runs every 5 minutes)
+    asyncio.create_task(periodic_media_cleanup())
+    print("🗑️  Started media cleanup task (runs every 5 minutes)")
 
 
 @app.on_event('shutdown')
@@ -1319,6 +1400,24 @@ async def periodic_cleanup():
         except Exception as e:
             print(f"⚠️ Cleanup task error: {e}")
             await asyncio.sleep(3600)  # Wait an hour on error before retrying
+
+
+async def periodic_media_cleanup():
+    """Background task to clean up media files older than 30 minutes."""
+    while True:
+        try:
+            # Run cleanup every 5 minutes
+            await asyncio.sleep(300)  # 300 seconds = 5 minutes
+            
+            print("🗑️  Running media cleanup (removing files older than 30 minutes)...")
+            result = cleanup_expired_media()
+            
+            if result.get('deleted_count', 0) > 0:
+                print(f"✓ Cleaned up {result['deleted_count']} files ({result['deleted_size_kb']:.2f} KB freed)")
+            
+        except Exception as e:
+            print(f"⚠️ Media cleanup task error: {e}")
+            await asyncio.sleep(300)  # Wait 5 minutes on error before retrying
 
 
 # Duplicate startup/shutdown removed - using the ones above with demo data initialization

@@ -233,6 +233,51 @@ const AlertsDashboard = () => {
                 )}
               </div>
             )}
+
+            {/* Media Attachments */}
+            {(alert.photo_urls?.length > 0 || alert.audio_url) && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-xs font-medium text-gray-700 mb-2">📎 Media Evidence:</p>
+                
+                {/* Photo Thumbnails */}
+                {alert.photo_urls?.length > 0 && (
+                  <div className="flex gap-2 mb-2">
+                    {alert.photo_urls.map((photoUrl, photoIndex) => (
+                      <a
+                        key={photoIndex}
+                        href={`http://localhost:8000${photoUrl}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative"
+                      >
+                        <img
+                          src={`http://localhost:8000${photoUrl}`}
+                          alt={`Evidence ${photoIndex + 1}`}
+                          className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300 group-hover:border-blue-500 transition-all"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
+                          <span className="text-white text-xs opacity-0 group-hover:opacity-100">View</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {/* Audio Player */}
+                {alert.audio_url && (
+                  <div className="bg-gray-50 rounded-lg p-2">
+                    <audio
+                      controls
+                      className="w-full h-8"
+                      style={{ maxHeight: '32px' }}
+                    >
+                      <source src={`http://localhost:8000${alert.audio_url}`} type="audio/webm" />
+                      Your browser does not support audio playback.
+                    </audio>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Action buttons for pending alerts */}

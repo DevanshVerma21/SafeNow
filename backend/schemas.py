@@ -32,6 +32,8 @@ class AlertCreate(BaseModel):
     location: Location
     attachments: Optional[List[Any]] = []
     severity: Optional[int] = Field(3, ge=1, le=5, description='Severity level 1-5')
+    photo_urls: Optional[List[str]] = []
+    audio_url: Optional[str] = None
 
 
 class AlertOut(AlertCreate):

@@ -155,5 +155,12 @@
     "name": "User",
     "role": "citizen",
     "is_verified": true
+  },
+  "9876543210 ": {
+    "id": "710b9ad9-f53a-4a92-a121-ed3bfa074b93",
+    "phone": "9876543210 ",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
   }
 }

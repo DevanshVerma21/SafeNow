@@ -6,6 +6,7 @@ import { useLocation } from '../../context/LocationContext';
 import ModernSOSButton from '../dashboard/ModernSOSButton';
 import QuickActions from '../dashboard/QuickActions';
 import LocationStatus from '../dashboard/LocationStatus';
+import MediaCapture from '../emergency/MediaCapture';
 import { 
   ExclamationTriangleIcon,
   PhoneIcon,
@@ -23,6 +24,7 @@ const EmergencyPage = () => {
   const { sendAlert } = useWebSocket();
   const { currentLocation, locationPermission } = useLocation();
   const [isSubmittingAlert, setIsSubmittingAlert] = useState(false);
+  const [capturedMedia, setCapturedMedia] = useState({ photos: [], audio: null, hasMedia: false });
 
   const emergencyTypes = [
     {
@@ -59,6 +61,10 @@ const EmergencyPage = () => {
     }
   ];
 
+  const handleMediaCaptured = (mediaData) => {
+    setCapturedMedia(mediaData);
+  };
+
   const handleEmergencyAlert = async (emergencyType) => {
     if (!currentLocation) {
       toast.error('Location access required for emergency alerts');
@@ -68,6 +74,7 @@ const EmergencyPage = () => {
     setIsSubmittingAlert(true);
     
     try {
+      // Create alert first
       const alertData = {
         type: emergencyType.type,
         title: emergencyType.title,
@@ -78,11 +85,44 @@ const EmergencyPage = () => {
         userPhone: user.phone,
         timestamp: new Date().toISOString(),
         urgency: emergencyType.urgency,
-        status: 'active'
+        status: 'active',
+        photo_urls: [],
+        audio_url: null
       };
 
-      await sendAlert(alertData);
-      toast.success(`${emergencyType.title} alert sent successfully!`);
+      // Send alert via WebSocket
+      const response = await sendAlert(alertData);
+      const alertId = response?.alert_id || Date.now(); // Fallback to timestamp if no ID returned
+
+      // Upload media if captured
+      if (capturedMedia.hasMedia) {
+        try {
+          const mediaUploadResponse = await fetch('http://localhost:8000/alerts/upload_media', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              alert_id: alertId,
+              photos: capturedMedia.photos,
+              audio: capturedMedia.audio
+            })
+          });
+
+          if (!mediaUploadResponse.ok) {
+            console.error('Media upload failed');
+            toast.error('Alert sent, but media upload failed');
+          } else {
+            const mediaResult = await mediaUploadResponse.json();
+            toast.success(`${emergencyType.title} alert sent with ${mediaResult.photos_saved} photo(s) and ${mediaResult.audio_saved ? 'audio' : 'no audio'}!`);
+          }
+        } catch (mediaError) {
+          console.error('Error uploading media:', mediaError);
+          toast.error('Alert sent, but media upload failed');
+        }
+      } else {
+        toast.success(`${emergencyType.title} alert sent successfully!`);
+      }
       
       // Auto-call emergency services for critical emergencies
       if (emergencyType.urgency === 'critical') {
@@ -121,11 +161,21 @@ const EmergencyPage = () => {
           </p>
         </motion.div>
 
+        {/* Media Capture Section */}
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="max-w-4xl mx-auto"
+        >
+          <MediaCapture onMediaCaptured={handleMediaCaptured} maxPhotos={3} />
+        </motion.div>
+
         {/* SOS Button Section */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
           className="flex justify-center"
         >
           <ModernSOSButton />
