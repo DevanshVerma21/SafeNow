@@ -1,15 +1,17 @@
 {
-  "00c2ff90-949f-4852-9272-cdf7439b65af": {
-    "type": "medical",
-    "note": "Emergency alert from mobile app - Medical Emergency",
+  "5653d068-988e-4d93-95c4-03e562c138bc": {
+    "type": "fire",
+    "note": "Emergency alert from mobile app - Fire Emergency",
     "location": {
-      "lat": 30.51603214335034,
-      "lng": 76.66028137689032,
-      "accuracy": 61.0
+      "lat": 28.5441315,
+      "lng": 77.334459,
+      "accuracy": 212.0,
+      "address": null
     },
     "attachments": [],
-    "id": "00c2ff90-949f-4852-9272-cdf7439b65af",
-    "user_id": "f44281d5-43ea-4c0a-8065-95522c499633",
+    "severity": 3,
+    "id": "5653d068-988e-4d93-95c4-03e562c138bc",
+    "user_id": "admin-001",
     "status": "open",
     "created_at": null
   }

@@ -277,6 +277,93 @@ async def list_alerts(status: str = "open"):
         return list(ALERTS.values())
 
 
+@app.get('/alerts/open')
+async def get_open_alerts(user=Depends(get_current_user)):
+    """Get all active/open alerts for admin dashboard."""
+    try:
+        query = """SELECT a.*, u.phone as user_phone, u.name as user_name
+                   FROM alerts a
+                   LEFT JOIN users u ON a.user_id = u.id
+                   WHERE a.status IN ('open', 'assigned', 'in_progress')
+                   ORDER BY a.created_at DESC"""
+        
+        rows = await database.fetch_all(query)
+        alerts = [dict(row) for row in rows]
+        
+        # Convert datetime objects to ISO strings
+        for alert in alerts:
+            for field in ['created_at', 'updated_at', 'resolved_at']:
+                if alert.get(field):
+                    alert[field] = alert[field].isoformat()
+        
+        print(f"✅ Retrieved {len(alerts)} open alerts for admin")
+        return alerts
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        return [alert for alert in ALERTS.values() if alert.get('status') in ['open', 'assigned', 'in_progress']]
+
+
+@app.get('/alerts/recent')
+async def get_recent_alerts(user=Depends(get_current_user)):
+    """Get recently resolved alerts (marked as done) for admin dashboard."""
+    try:
+        query = """SELECT a.*, u.phone as user_phone, u.name as user_name
+                   FROM alerts a
+                   LEFT JOIN users u ON a.user_id = u.id
+                   WHERE a.status = 'done'
+                   ORDER BY a.updated_at DESC
+                   LIMIT 50"""
+        
+        rows = await database.fetch_all(query)
+        alerts = [dict(row) for row in rows]
+        
+        # Convert datetime objects to ISO strings
+        for alert in alerts:
+            for field in ['created_at', 'updated_at', 'resolved_at', 'marked_done_at']:
+                if alert.get(field):
+                    alert[field] = alert[field].isoformat()
+        
+        print(f"✅ Retrieved {len(alerts)} recent resolved alerts for admin")
+        return alerts
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        return [alert for alert in ALERTS.values() if alert.get('status') == 'done']
+
+
+@app.get('/responders/active')
+async def get_active_responders(user=Depends(get_current_user)):
+    """Get all active responders for admin dashboard."""
+    try:
+        query = """SELECT r.*, u.name as name, u.phone, u.email,
+                   COUNT(a.id) as assigned_alerts_count,
+                   MAX(a.id) as current_alert_id
+                   FROM responders r
+                   LEFT JOIN users u ON r.user_id = u.id
+                   LEFT JOIN alerts a ON a.assigned_responder_id = r.id 
+                        AND a.status IN ('assigned', 'in_progress')
+                   WHERE r.status = 'active'
+                   GROUP BY r.id, u.name, u.phone, u.email
+                   ORDER BY r.updated_at DESC"""
+        
+        rows = await database.fetch_all(query)
+        responders = [dict(row) for row in rows]
+        
+        # Convert datetime objects to ISO strings
+        for responder in responders:
+            for field in ['created_at', 'updated_at']:
+                if responder.get(field):
+                    responder[field] = responder[field].isoformat()
+        
+        print(f"✅ Retrieved {len(responders)} active responders for admin")
+        return responders
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        return [resp for resp in RESPONDERS.values() if resp.get('status') == 'active']
+
+
 @app.put('/alerts/{alert_id}/mark-done')
 async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
     """Mark an alert as done by a responder."""
@@ -288,35 +375,30 @@ async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
         if not alert_row:
             raise HTTPException(status_code=404, detail="Alert not found")
         
-        # Update in database
+        # Update in database - NO AUTO-DELETION, keep for history
         marked_time = datetime.utcnow()
-        auto_delete_time = marked_time + timedelta(seconds=10)  # Auto-delete after 10 seconds
         
         update_query = """UPDATE alerts 
                          SET status = 'done', 
                              marked_done_at = :marked_time,
-                             auto_delete_at = :auto_delete_time,
                              updated_at = now()
                          WHERE id = :alert_id"""
         
         result = await database.execute(update_query, values={
             "alert_id": alert_id,
-            "marked_time": marked_time,
-            "auto_delete_time": auto_delete_time
+            "marked_time": marked_time
         })
         
         if result:
-            print(f"✅ Alert {alert_id} marked as done by user {user.get('sub', 'unknown')}")
+            print(f"✅ Alert {alert_id} marked as done by user {user.get('sub', 'unknown')} - Kept in history")
             
-            # Schedule automatic deletion
-            asyncio.create_task(auto_delete_alert(alert_id, 10))
+            # NO automatic deletion - keep alerts for admin dashboard history
             
             # Get updated alert data for broadcasting
             updated_alert = dict(alert_row)
             updated_alert.update({
                 "status": "done",
-                "marked_done_at": marked_time.isoformat(),
-                "auto_delete_at": auto_delete_time.isoformat()
+                "marked_done_at": marked_time.isoformat()
             })
             
             # Broadcast comprehensive update to all connected clients
@@ -333,11 +415,10 @@ async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
             
             return {
                 "success": True, 
-                "message": "Alert marked as done", 
+                "message": "Alert marked as done and saved to history", 
                 "alert_id": alert_id,
                 "status": "done",
-                "marked_done_at": marked_time.isoformat(),
-                "auto_delete_in_seconds": 10
+                "marked_done_at": marked_time.isoformat()
             }
         else:
             raise HTTPException(status_code=404, detail="Alert not found or already processed")
