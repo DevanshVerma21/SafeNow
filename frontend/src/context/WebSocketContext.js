@@ -5,7 +5,8 @@ import { useAuth } from './AuthContext';
 
 const WebSocketContext = createContext();
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:8000';
+const WS_BASE_URL = process.env.REACT_APP_WEBSOCKET_URL || 'ws://localhost:8000';
 
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
@@ -137,7 +138,7 @@ export const WebSocketProvider = ({ children }) => {
 
       setConnectionStatus('connecting');
       
-      const wsUrl = `ws://localhost:8000/ws/alerts?token=${token}`;
+      const wsUrl = `${WS_BASE_URL}/ws/alerts?token=${token}`;
       const newSocket = new WebSocket(wsUrl);
 
       newSocket.onopen = () => {
