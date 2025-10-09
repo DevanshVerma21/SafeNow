@@ -100,6 +100,54 @@ async def root():
     return {"message": "SafeNow Backend API is running", "status": "healthy", "docs": "/docs"}
 
 
+@app.get('/init-db')
+async def init_database():
+    """Initialize database tables if they don't exist"""
+    try:
+        # Check if emergency_contacts table exists
+        check_query = """
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'emergency_contacts'
+        );
+        """
+        result = await database.fetch_one(check_query)
+        
+        if not result[0]:  # Table doesn't exist
+            # Create emergency_contacts table
+            create_table_query = """
+            CREATE TABLE emergency_contacts (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID NOT NULL,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                relationship TEXT DEFAULT 'friend',
+                priority INTEGER DEFAULT 1,
+                is_default BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+            );
+            """
+            await database.execute(create_table_query)
+            
+            # Insert default emergency contacts
+            insert_defaults = """
+            INSERT INTO emergency_contacts (name, phone, relationship, priority, is_default, user_id) VALUES
+            ('Emergency Services (Police)', '100', 'emergency', 1, true, '00000000-0000-0000-0000-000000000000'),
+            ('Ambulance / Medical Emergency', '102', 'medical', 2, true, '00000000-0000-0000-0000-000000000000'),
+            ('Fire Department', '101', 'fire', 3, true, '00000000-0000-0000-0000-000000000000');
+            """
+            await database.execute(insert_defaults)
+            
+            return {"message": "Database initialized successfully", "created": "emergency_contacts table"}
+        else:
+            return {"message": "Database already initialized", "status": "ok"}
+            
+    except Exception as e:
+        return {"error": f"Database initialization failed: {str(e)}"}
+
+
 @app.post('/auth/request_otp')
 async def request_otp(req: OTPRequest):
     # Validate phone number format
