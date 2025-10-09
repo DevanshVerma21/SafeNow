@@ -29,11 +29,11 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
   if (requiredRole && user?.role !== requiredRole) {
     // Redirect to user's appropriate dashboard based on their role
     if (user.role === 'admin') {
-      return <Navigate to="/admin" replace />;
+      return <Navigate to="/admin-dashboard" replace />;
     } else if (user.role === 'volunteer' || user.role === 'responder') {
       return <Navigate to="/responder" replace />;
     } else {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to="/user-dashboard" replace />;
     }
   }
   
@@ -61,9 +61,9 @@ function AppContent() {
   const getDefaultDashboard = () => {
     if (!isAuthenticated || !user) return '/login';
     
-    if (user.role === 'admin') return '/admin';
+    if (user.role === 'admin') return '/admin-dashboard';
     if (user.role === 'volunteer' || user.role === 'responder') return '/responder';
-    return '/dashboard';
+    return '/user-dashboard';
   };
 
   return (
@@ -96,13 +96,14 @@ function AppContent() {
             path="/login" 
             element={
               isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
+                <Navigate to={getDefaultDashboard()} replace /> : 
                 <LoginPage />
             } 
           />
           
+          {/* User Dashboard - Regular citizens */}
           <Route 
-            path="/dashboard" 
+            path="/user-dashboard" 
             element={
               <ProtectedRoute>
                 <Dashboard />
@@ -110,6 +111,13 @@ function AppContent() {
             } 
           />
           
+          {/* Legacy route redirect */}
+          <Route 
+            path="/dashboard" 
+            element={<Navigate to="/user-dashboard" replace />} 
+          />
+          
+          {/* Responder Dashboard */}
           <Route 
             path="/responder" 
             element={
@@ -119,13 +127,20 @@ function AppContent() {
             } 
           />
           
+          {/* Admin Dashboard - Complete management interface */}
           <Route 
-            path="/admin" 
+            path="/admin-dashboard" 
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
               </ProtectedRoute>
             } 
+          />
+          
+          {/* Legacy admin route redirect */}
+          <Route 
+            path="/admin" 
+            element={<Navigate to="/admin-dashboard" replace />} 
           />
           
           <Route 

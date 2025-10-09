@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 import { 
   ExclamationTriangleIcon,
   ClockIcon,
@@ -14,7 +15,8 @@ import { formatDistanceToNow } from 'date-fns';
 
 const RecentAlerts = () => {
   const { alerts, markAlertAsDone } = useWebSocket();
-  const { user } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
+  const [recentAlerts, setRecentAlerts] = useState([]);
 
   const isResponder = user?.role === 'responder' || user?.role === 'admin';
 
@@ -66,34 +68,60 @@ const RecentAlerts = () => {
     const success = await markAlertAsDone(alertId);
     if (success) {
       console.log(`Alert ${alertId} marked as done`);
+      // Refresh recent alerts after marking as done
+      fetchRecentAlerts();
     }
   };
 
-  // Filter to show only open alerts
-  const openAlerts = alerts.filter(alert => alert.status === 'open' || alert.status === 'assigned' || alert.status === 'in_progress');
-  const recentAlerts = openAlerts.slice(0, 5); // Show latest 5 open alerts
+  // Fetch user's recent resolved alerts
+  const fetchRecentAlerts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/alerts/user/recent', {
+        headers: getAuthHeaders()
+      });
+      setRecentAlerts(response.data);
+    } catch (error) {
+      console.error('Error fetching recent alerts:', error);
+    }
+  };
+
+  // Fetch recent alerts on component mount
+  useEffect(() => {
+    fetchRecentAlerts();
+    
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(fetchRecentAlerts, 10000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Refresh when alerts change (WebSocket updates)
+  useEffect(() => {
+    fetchRecentAlerts();
+  }, [alerts]);
 
   return (
     <div className="modern-card p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <ExclamationTriangleIcon className="w-6 h-6 text-red-600 mr-2" />
+          <CheckCircleIcon className="w-6 h-6 text-green-600 mr-2" />
           <h3 className="text-xl font-bold gradient-text">Recent Alerts</h3>
+          <span className="ml-2 text-sm text-gray-500">(Last 24 hours)</span>
         </div>
         
         <div className="flex items-center space-x-1 text-sm text-gray-500">
-          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-          <span>Live</span>
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span>Resolved</span>
         </div>
       </div>
 
       {recentAlerts.length === 0 ? (
         <div className="text-center py-8">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-            <ExclamationTriangleIcon className="w-8 h-8 text-gray-400" />
+            <CheckCircleIcon className="w-8 h-8 text-gray-400" />
           </div>
           <h4 className="text-sm font-medium text-gray-900 mb-1">No Recent Alerts</h4>
-          <p className="text-xs text-gray-500">Emergency alerts will appear here</p>
+          <p className="text-xs text-gray-500">Your resolved alerts from the last 24 hours will appear here</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -140,14 +168,14 @@ const RecentAlerts = () => {
                         )}
                         
                         <div className="flex items-center space-x-1">
-                          <ClockIcon className="w-3 h-3" />
-                          <span>
-                            {formatDistanceToNow(new Date(alert.created_at || Date.now()), { addSuffix: true })}
+                          <CheckCircleIcon className="w-3 h-3 text-green-600" />
+                          <span className="text-green-600 font-medium">
+                            Resolved {formatDistanceToNow(new Date(alert.resolved_at || alert.marked_done_at || Date.now()), { addSuffix: true })}
                           </span>
                         </div>
                       </div>
                       
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full capitalize ${statusColors}`}>
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full capitalize bg-green-100 text-green-800`}>
                         {alert.status}
                       </span>
                     </div>
@@ -199,15 +227,6 @@ const RecentAlerts = () => {
               </motion.div>
             );
           })}
-        </div>
-      )}
-
-      {/* View All Button */}
-      {openAlerts.length > 5 && (
-        <div className="mt-4 text-center">
-          <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-            View All Open Alerts ({openAlerts.length})
-          </button>
         </div>
       )}
     </div>

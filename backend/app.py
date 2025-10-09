@@ -140,7 +140,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def create_alert(a: AlertCreate, user=Depends(get_current_user)):
     alert_id = str(uuid.uuid4())
     alert = a.dict()
-    alert.update({"id": alert_id, "user_id": user.get('sub'), "status": "open", "created_at": None})
+    alert.update({"id": alert_id, "user_id": user.get('sub'), "status": "active", "created_at": None})
     
     # Always persist to DB first (with fallback to memory for demo)
     insert_q = """INSERT INTO alerts (id, user_id, type, status, created_at, updated_at, location, 
@@ -188,7 +188,7 @@ async def schedule_auto_assign(alert_id: str, delay: int = 30):
         except Exception:
             return
 
-    if alert.get('status') != 'open':
+    if alert.get('status') not in ['open', 'active']:
         return
 
     # gather available responders (simple: RESPONDERS in-memory or DB responders with status available)
@@ -247,6 +247,54 @@ async def schedule_auto_assign(alert_id: str, delay: int = 30):
     await broadcast_alert(to_broadcast)
 
 
+@app.get('/alerts/user/recent')
+async def get_user_recent_alerts(user=Depends(get_current_user)):
+    """Get user's own resolved alerts from the last 24 hours."""
+    try:
+        user_id = user.get('sub')
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        
+        query = """SELECT a.*, u.phone as user_phone, u.name as user_name
+                   FROM alerts a
+                   LEFT JOIN users u ON a.user_id = u.id
+                   WHERE a.user_id = :user_id
+                     AND a.status IN ('resolved', 'done')
+                     AND (a.resolved_at >= :cutoff_time OR a.marked_done_at >= :cutoff_time)
+                   ORDER BY COALESCE(a.resolved_at, a.marked_done_at) DESC
+                   LIMIT 20"""
+        
+        rows = await database.fetch_all(query, values={
+            "user_id": user_id,
+            "cutoff_time": cutoff_time
+        })
+        alerts = [dict(row) for row in rows]
+        
+        # Convert datetime objects to ISO strings
+        for alert in alerts:
+            for field in ['created_at', 'updated_at', 'resolved_at', 'marked_done_at']:
+                if alert.get(field):
+                    alert[field] = alert[field].isoformat()
+        
+        print(f"✅ Retrieved {len(alerts)} recent resolved alerts for user {user_id}")
+        return alerts
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        user_id = user.get('sub')
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        recent_alerts = []
+        for alert in ALERTS.values():
+            if alert.get('user_id') == user_id and alert.get('status') in ['resolved', 'done']:
+                resolved_at = alert.get('resolved_at') or alert.get('marked_done_at')
+                if resolved_at:
+                    try:
+                        resolved_dt = datetime.fromisoformat(resolved_at.replace('Z', '+00:00'))
+                        if resolved_dt >= cutoff_time:
+                            recent_alerts.append(alert)
+                    except:
+                        recent_alerts.append(alert)
+        return recent_alerts
+
 
 @app.get('/alerts')
 async def list_alerts(status: str = "open"):
@@ -279,41 +327,13 @@ async def list_alerts(status: str = "open"):
 
 @app.get('/alerts/open')
 async def get_open_alerts(user=Depends(get_current_user)):
-    """Get all active/open alerts for admin dashboard."""
+    """Get all active alerts for admin dashboard."""
     try:
         query = """SELECT a.*, u.phone as user_phone, u.name as user_name
                    FROM alerts a
                    LEFT JOIN users u ON a.user_id = u.id
-                   WHERE a.status IN ('open', 'assigned', 'in_progress')
+                   WHERE a.status IN ('active', 'open', 'assigned', 'in_progress')
                    ORDER BY a.created_at DESC"""
-        
-        rows = await database.fetch_all(query)
-        alerts = [dict(row) for row in rows]
-        
-        # Convert datetime objects to ISO strings
-        for alert in alerts:
-            for field in ['created_at', 'updated_at', 'resolved_at']:
-                if alert.get(field):
-                    alert[field] = alert[field].isoformat()
-        
-        print(f"✅ Retrieved {len(alerts)} open alerts for admin")
-        return alerts
-    except Exception as e:
-        print(f"⚠️ Database error: {e}")
-        # Fallback to in-memory
-        return [alert for alert in ALERTS.values() if alert.get('status') in ['open', 'assigned', 'in_progress']]
-
-
-@app.get('/alerts/recent')
-async def get_recent_alerts(user=Depends(get_current_user)):
-    """Get recently resolved alerts (marked as done) for admin dashboard."""
-    try:
-        query = """SELECT a.*, u.phone as user_phone, u.name as user_name
-                   FROM alerts a
-                   LEFT JOIN users u ON a.user_id = u.id
-                   WHERE a.status = 'done'
-                   ORDER BY a.updated_at DESC
-                   LIMIT 50"""
         
         rows = await database.fetch_all(query)
         alerts = [dict(row) for row in rows]
@@ -324,12 +344,56 @@ async def get_recent_alerts(user=Depends(get_current_user)):
                 if alert.get(field):
                     alert[field] = alert[field].isoformat()
         
-        print(f"✅ Retrieved {len(alerts)} recent resolved alerts for admin")
+        print(f"✅ Retrieved {len(alerts)} active alerts for admin")
         return alerts
     except Exception as e:
         print(f"⚠️ Database error: {e}")
         # Fallback to in-memory
-        return [alert for alert in ALERTS.values() if alert.get('status') == 'done']
+        return [alert for alert in ALERTS.values() if alert.get('status') in ['active', 'open', 'assigned', 'in_progress']]
+
+
+@app.get('/alerts/recent')
+async def get_recent_alerts(user=Depends(get_current_user)):
+    """Get recently resolved alerts from the last 24 hours for admin dashboard."""
+    try:
+        # Calculate cutoff time (24 hours ago)
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        
+        query = """SELECT a.*, u.phone as user_phone, u.name as user_name
+                   FROM alerts a
+                   LEFT JOIN users u ON a.user_id = u.id
+                   WHERE a.status IN ('resolved', 'done')
+                     AND (a.resolved_at >= :cutoff_time OR a.marked_done_at >= :cutoff_time)
+                   ORDER BY COALESCE(a.resolved_at, a.marked_done_at) DESC
+                   LIMIT 100"""
+        
+        rows = await database.fetch_all(query, values={"cutoff_time": cutoff_time})
+        alerts = [dict(row) for row in rows]
+        
+        # Convert datetime objects to ISO strings
+        for alert in alerts:
+            for field in ['created_at', 'updated_at', 'resolved_at', 'marked_done_at']:
+                if alert.get(field):
+                    alert[field] = alert[field].isoformat()
+        
+        print(f"✅ Retrieved {len(alerts)} recent resolved alerts (last 24 hours) for admin")
+        return alerts
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        recent_alerts = []
+        for alert in ALERTS.values():
+            if alert.get('status') in ['resolved', 'done']:
+                resolved_at = alert.get('resolved_at') or alert.get('marked_done_at')
+                if resolved_at:
+                    try:
+                        resolved_dt = datetime.fromisoformat(resolved_at.replace('Z', '+00:00'))
+                        if resolved_dt >= cutoff_time:
+                            recent_alerts.append(alert)
+                    except:
+                        recent_alerts.append(alert)
+        return recent_alerts
 
 
 @app.get('/responders/active')
@@ -366,7 +430,7 @@ async def get_active_responders(user=Depends(get_current_user)):
 
 @app.put('/alerts/{alert_id}/mark-done')
 async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
-    """Mark an alert as done by a responder."""
+    """Mark an alert as resolved by a responder."""
     try:
         # First, get the current alert details
         alert_query = "SELECT * FROM alerts WHERE id = :alert_id"
@@ -375,50 +439,52 @@ async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
         if not alert_row:
             raise HTTPException(status_code=404, detail="Alert not found")
         
-        # Update in database - NO AUTO-DELETION, keep for history
-        marked_time = datetime.utcnow()
+        # Update in database - Change status to 'resolved' and set resolvedAt timestamp
+        resolved_time = datetime.utcnow()
         
         update_query = """UPDATE alerts 
-                         SET status = 'done', 
-                             marked_done_at = :marked_time,
+                         SET status = 'resolved', 
+                             resolved_at = :resolved_time,
+                             marked_done_at = :resolved_time,
                              updated_at = now()
                          WHERE id = :alert_id"""
         
         result = await database.execute(update_query, values={
             "alert_id": alert_id,
-            "marked_time": marked_time
+            "resolved_time": resolved_time
         })
         
         if result:
-            print(f"✅ Alert {alert_id} marked as done by user {user.get('sub', 'unknown')} - Kept in history")
-            
-            # NO automatic deletion - keep alerts for admin dashboard history
+            print(f"✅ Alert {alert_id} marked as resolved by user {user.get('sub', 'unknown')} - Will auto-delete after 24 hours")
             
             # Get updated alert data for broadcasting
             updated_alert = dict(alert_row)
             updated_alert.update({
-                "status": "done",
-                "marked_done_at": marked_time.isoformat()
+                "status": "resolved",
+                "resolved_at": resolved_time.isoformat(),
+                "marked_done_at": resolved_time.isoformat()
             })
             
             # Broadcast comprehensive update to all connected clients
             broadcast_data = {
                 "type": "alert_status_changed",
-                "action": "marked_done",
+                "action": "marked_resolved",
                 "alert": updated_alert,
                 "alert_id": alert_id,
-                "status": "done",
-                "marked_done_at": marked_time.isoformat(),
+                "status": "resolved",
+                "resolved_at": resolved_time.isoformat(),
+                "marked_done_at": resolved_time.isoformat(),
                 "marked_by": user.get('sub', 'unknown')
             }
             await broadcast_alert(broadcast_data)
             
             return {
                 "success": True, 
-                "message": "Alert marked as done and saved to history", 
+                "message": "Alert marked as resolved and moved to history (will be deleted after 24 hours)", 
                 "alert_id": alert_id,
-                "status": "done",
-                "marked_done_at": marked_time.isoformat()
+                "status": "resolved",
+                "resolved_at": resolved_time.isoformat(),
+                "marked_done_at": resolved_time.isoformat()
             }
         else:
             raise HTTPException(status_code=404, detail="Alert not found or already processed")
@@ -427,21 +493,23 @@ async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
         print(f"⚠️ Database error: {e}")
         # Fallback to in-memory
         if alert_id in ALERTS:
-            ALERTS[alert_id]['status'] = 'done'
-            ALERTS[alert_id]['marked_done_at'] = datetime.utcnow().isoformat()
+            resolved_time = datetime.utcnow()
+            ALERTS[alert_id]['status'] = 'resolved'
+            ALERTS[alert_id]['resolved_at'] = resolved_time.isoformat()
+            ALERTS[alert_id]['marked_done_at'] = resolved_time.isoformat()
             
             # Broadcast fallback update
             broadcast_data = {
                 "type": "alert_status_changed",
-                "action": "marked_done",
+                "action": "marked_resolved",
                 "alert_id": alert_id,
-                "status": "done",
+                "status": "resolved",
+                "resolved_at": ALERTS[alert_id]['resolved_at'],
                 "marked_done_at": ALERTS[alert_id]['marked_done_at']
             }
             await broadcast_alert(broadcast_data)
             
-            asyncio.create_task(auto_delete_alert_memory(alert_id, 10))
-            return {"success": True, "message": "Alert marked as done (memory)", "alert_id": alert_id}
+            return {"success": True, "message": "Alert marked as resolved (memory)", "alert_id": alert_id}
         else:
             raise HTTPException(status_code=404, detail="Alert not found")
 
@@ -737,24 +805,58 @@ async def broadcast_alert(alert: dict):
         pass
 
 
+async def cleanup_old_resolved_alerts():
+    """Delete resolved alerts older than 24 hours."""
+    try:
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        
+        # Delete from database
+        delete_query = """DELETE FROM alerts 
+                         WHERE status IN ('resolved', 'done')
+                         AND (resolved_at < :cutoff_time OR marked_done_at < :cutoff_time)"""
+        
+        result = await database.execute(delete_query, values={"cutoff_time": cutoff_time})
+        
+        if result > 0:
+            print(f"🧹 Deleted {result} resolved alerts older than 24 hours")
+        
+        # Also clean up in-memory storage
+        alerts_to_delete = []
+        for alert_id, alert in ALERTS.items():
+            if alert.get('status') in ['resolved', 'done']:
+                resolved_at = alert.get('resolved_at') or alert.get('marked_done_at')
+                if resolved_at:
+                    try:
+                        resolved_dt = datetime.fromisoformat(resolved_at.replace('Z', '+00:00'))
+                        if resolved_dt < cutoff_time:
+                            alerts_to_delete.append(alert_id)
+                    except:
+                        pass
+        
+        for alert_id in alerts_to_delete:
+            del ALERTS[alert_id]
+        
+        if alerts_to_delete:
+            save_alerts(ALERTS)
+            print(f"🧹 Cleaned up {len(alerts_to_delete)} old resolved alerts from memory")
+            
+    except Exception as e:
+        print(f"⚠️ Error during cleanup: {e}")
+
+
 async def periodic_cleanup():
-    """Background task to clean up alerts scheduled for deletion."""
+    """Background task to clean up alerts scheduled for deletion and old resolved alerts."""
     while True:
         try:
-            await asyncio.sleep(30)  # Check every 30 seconds
+            # Run cleanup every hour
+            await asyncio.sleep(3600)  # 3600 seconds = 1 hour
             
-            # Clean up alerts that are past their auto_delete_at time
-            cleanup_query = """DELETE FROM alerts 
-                             WHERE auto_delete_at IS NOT NULL 
-                             AND auto_delete_at <= now()"""
-            
-            result = await database.execute(cleanup_query)
-            if result and result > 0:
-                print(f"🧹 Cleaned up {result} expired alerts from database")
+            print("🧹 Running hourly cleanup of old resolved alerts...")
+            await cleanup_old_resolved_alerts()
                 
         except Exception as e:
             print(f"⚠️ Cleanup task error: {e}")
-            await asyncio.sleep(60)  # Wait longer on error
+            await asyncio.sleep(3600)  # Wait an hour on error before retrying
 
 
 # Duplicate startup/shutdown removed - using the ones above with demo data initialization
