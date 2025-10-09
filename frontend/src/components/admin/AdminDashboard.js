@@ -20,6 +20,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import MapMarker from '../common/MapMarker';
+import LocationPin from '../common/LocationPin';
 
 const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
 
@@ -493,10 +494,10 @@ const AdminDashboard = () => {
                                   </div>
                                 </td>
                                 <td className="px-4 py-4">
-                                  <MapMarker 
+                                  <LocationPin 
                                     location={alert.location} 
                                     alertType={alert.type}
-                                    compact={true}
+                                    alertId={alert.id}
                                   />
                                 </td>
                                 <td className="px-4 py-4">
@@ -701,10 +702,10 @@ const AdminDashboard = () => {
                                   </div>
                                 </td>
                                 <td className="px-4 py-4">
-                                  <MapMarker 
+                                  <LocationPin 
                                     location={alert.location} 
                                     alertType={alert.type}
-                                    compact={true}
+                                    alertId={alert.id}
                                   />
                                 </td>
                                 <td className="px-4 py-4">
