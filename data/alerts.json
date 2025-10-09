@@ -136,9 +136,11 @@
     "severity": 3,
     "id": "47261219-ad43-4c8f-8292-8842506dcd21",
     "user_id": "593f69e0-5fa6-4c5e-97a1-8ee29cbfb9ad",
-    "status": "pending",
+    "status": "resolved",
     "created_at": "2025-10-09T14:21:01.824328",
-    "updated_at": "2025-10-09T14:21:01.824328"
+    "updated_at": "2025-10-09T14:21:01.824328",
+    "resolved_at": "2025-10-09T21:18:19.614768",
+    "marked_done_at": "2025-10-09T21:18:19.614768"
   },
   "83b70f97-8c00-418b-bb0d-fd8aa47552fa": {
     "type": "medical",
@@ -153,8 +155,46 @@
     "severity": 3,
     "id": "83b70f97-8c00-418b-bb0d-fd8aa47552fa",
     "user_id": "admin-001",
-    "status": "pending",
+    "status": "resolved",
     "created_at": "2025-10-09T16:34:23.939655",
-    "updated_at": "2025-10-09T16:34:23.939655"
+    "updated_at": "2025-10-09T16:34:23.939655",
+    "resolved_at": "2025-10-09T21:19:11.238987",
+    "marked_done_at": "2025-10-09T21:19:11.238987"
+  },
+  "a52998b5-4325-430f-86d6-6bc55f3b0fc2": {
+    "type": "safety",
+    "note": "Emergency alert from mobile app - Personal Safety",
+    "location": {
+      "lat": 28.5441365,
+      "lng": 77.3327736,
+      "accuracy": 76.904,
+      "address": null
+    },
+    "attachments": [],
+    "severity": 3,
+    "id": "a52998b5-4325-430f-86d6-6bc55f3b0fc2",
+    "user_id": "admin-001",
+    "status": "resolved",
+    "created_at": "2025-10-09T21:17:57.017320",
+    "updated_at": "2025-10-09T21:17:57.017320",
+    "resolved_at": "2025-10-09T21:19:49.150543",
+    "marked_done_at": "2025-10-09T21:19:49.150543"
+  },
+  "83edf78d-a3ba-4bec-a908-7b2e08c1cfeb": {
+    "type": "safety",
+    "note": "Emergency alert from mobile app - Personal Safety",
+    "location": {
+      "lat": 28.5441365,
+      "lng": 77.3327736,
+      "accuracy": 76.904,
+      "address": null
+    },
+    "attachments": [],
+    "severity": 3,
+    "id": "83edf78d-a3ba-4bec-a908-7b2e08c1cfeb",
+    "user_id": "admin-001",
+    "status": "pending",
+    "created_at": "2025-10-09T21:19:39.490881",
+    "updated_at": "2025-10-09T21:19:39.490881"
   }
 }

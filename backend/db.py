@@ -1,7 +1,8 @@
 import os
 from databases import Database
 
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://sos:sos_pass@localhost:5432/sosdb')
+# Use cloud PostgreSQL database on Render
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://safenow:1PenObnY5UVYgwX6nVd8O6zTJTvG9kTj@dpg-d3k11cndiees738rddag-a.oregon-postgres.render.com/safenow')
 
 database = Database(DATABASE_URL)
 
