@@ -95,6 +95,11 @@ def validate_phone_number(phone: str) -> tuple[bool, str]:
     return True, ""
 
 
+@app.get('/')
+async def root():
+    return {"message": "SafeNow Backend API is running", "status": "healthy", "docs": "/docs"}
+
+
 @app.post('/auth/request_otp')
 async def request_otp(req: OTPRequest):
     # Validate phone number format
