@@ -135,12 +135,27 @@ const AlertsDashboard = () => {
   // Fetch user's dashboard alerts (both pending and resolved)
   const fetchDashboardData = async () => {
     try {
+      console.log('Fetching dashboard data from:', `${API_BASE}/alerts/user/dashboard`);
+      
+      const headers = getAuthHeaders();
+      console.log('Using headers:', headers);
+      
       const response = await axios.get(`${API_BASE}/alerts/user/dashboard`, {
-        headers: getAuthHeaders()
+        headers: headers
       });
+      
+      console.log('Dashboard data response:', response.data);
       setDashboardData(response.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      if (error.response?.status === 401) {
+        console.error('Authentication failed for dashboard');
+      } else if (error.response?.status === 404) {
+        console.error('Dashboard endpoint not found');
+      }
     }
   };
 

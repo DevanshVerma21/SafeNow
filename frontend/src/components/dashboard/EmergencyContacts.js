@@ -28,13 +28,38 @@ const EmergencyContacts = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      
+      if (!token) {
+        console.error('No token found');
+        toast.error('Please login to view emergency contacts');
+        return;
+      }
+      
+      console.log('Fetching from:', `${API_BASE}/emergency-contacts`);
+      console.log('Token:', token.substring(0, 20) + '...');
+      
       const response = await axios.get(`${API_BASE}/emergency-contacts`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
+      console.log('Emergency contacts response:', response.data);
       setContacts(response.data);
     } catch (error) {
       console.error('Error fetching emergency contacts:', error);
-      toast.error('Failed to load emergency contacts');
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please login again.');
+      } else if (error.response?.status === 404) {
+        toast.error('Emergency contacts endpoint not found');
+      } else {
+        toast.error('Failed to load emergency contacts');
+      }
+      
       // Fallback to default contacts on error
       setContacts([
         { id: 'default-1', name: 'Emergency Services (Police)', phone: '100', relationship: 'emergency', priority: 1, is_default: true },
