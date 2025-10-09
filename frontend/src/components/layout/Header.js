@@ -51,10 +51,17 @@ const Header = () => {
     }
   };
 
+  // Dynamic navigation based on user role
+  const getDashboardPath = () => {
+    if (user?.role === 'admin') return '/admin-dashboard';
+    if (user?.role === 'responder') return '/responder';
+    return '/user-dashboard';
+  };
+
   const navItems = [
-    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard', roles: ['citizen', 'responder', 'admin'] },
+    { path: '/user-dashboard', icon: HomeIcon, label: 'Dashboard', roles: ['citizen'] },
     { path: '/responder', icon: ShieldCheckIcon, label: 'Responder', roles: ['responder'] },
-    { path: '/admin', icon: UserGroupIcon, label: 'Admin', roles: ['admin'] },
+    { path: '/admin-dashboard', icon: UserGroupIcon, label: 'Admin', roles: ['admin'] },
   ];
 
   const filteredNavItems = navItems.filter(item => 
@@ -73,7 +80,7 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/dashboard" className="flex items-center space-x-2">
+            <Link to={getDashboardPath()} className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">SOS</span>
               </div>

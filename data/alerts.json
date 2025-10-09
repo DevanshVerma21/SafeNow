@@ -85,87 +85,19 @@
     "status": "active",
     "created_at": null
   },
-  "63165810-aa71-4aa9-85e8-f02461a70848": {
-    "type": "accident",
-    "note": "Emergency alert from mobile app - Accident",
-    "location": {
-      "lat": 28.54560534366435,
-      "lng": 77.33448854147768,
-      "accuracy": 71.0,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "63165810-aa71-4aa9-85e8-f02461a70848",
-    "user_id": "7ed6c233-3564-4829-a2db-8840e6ebec0c",
-    "status": "active",
-    "created_at": null
-  },
-  "30a67569-4c18-411e-9de7-45b1e6ca205f": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
-    "location": {
-      "lat": 28.5454517,
-      "lng": 77.3340549,
-      "accuracy": 149.386,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "30a67569-4c18-411e-9de7-45b1e6ca205f",
-    "user_id": "9b2c28a6-29af-4c05-9669-06de34a030b0",
-    "status": "active",
-    "created_at": null
-  },
-  "7aecb73d-cfe8-495a-aa37-cf7d34f60ff8": {
+  "1607a076-3c98-481e-9b27-bbe3f226f5da": {
     "type": "medical",
     "note": "Emergency alert from mobile app - Medical Emergency",
     "location": {
-      "lat": 28.5501005,
-      "lng": 77.3288417,
-      "accuracy": 1973.439741111239,
+      "lat": 28.545583350584142,
+      "lng": 77.33444381263783,
+      "accuracy": 61.0,
       "address": null
     },
     "attachments": [],
     "severity": 3,
-    "id": "7aecb73d-cfe8-495a-aa37-cf7d34f60ff8",
-    "user_id": "462083a8-c1cf-4185-ac85-ffdfc789b075",
-    "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T07:40:33.979219",
-    "marked_done_at": "2025-10-09T07:40:33.979219"
-  },
-  "889e9954-5f89-41fa-8a9f-3bfb0d5fa67c": {
-    "type": "medical",
-    "note": "Emergency alert from mobile app - Medical Emergency",
-    "location": {
-      "lat": 28.5501005,
-      "lng": 77.3288417,
-      "accuracy": 1973.439741111239,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "889e9954-5f89-41fa-8a9f-3bfb0d5fa67c",
+    "id": "1607a076-3c98-481e-9b27-bbe3f226f5da",
     "user_id": "admin-001",
-    "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T07:49:21.347490",
-    "marked_done_at": "2025-10-09T07:49:21.347490"
-  },
-  "727a662c-0d89-4ac6-89cc-23ebb8bb23a4": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
-    "location": {
-      "lat": 28.5501005,
-      "lng": 77.3288417,
-      "accuracy": 1973.439741111239,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "727a662c-0d89-4ac6-89cc-23ebb8bb23a4",
-    "user_id": "011da83f-6ea1-4d44-9f06-3b7195f3442d",
     "status": "pending",
     "created_at": null
   }
