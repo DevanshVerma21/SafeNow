@@ -716,7 +716,6 @@ input:checked + .toggle-slider:before {
   }
 }
 
-<<<<<<< HEAD
 /* Sidebar Styles */
 .sidebar-container {
   position: fixed;
@@ -832,7 +831,8 @@ input:checked + .toggle-slider:before {
 
 .sidebar-container *::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.7);
-=======
+}
+
 /* Emergency Contacts Section - Custom Styles */
 .emergency-contact-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -899,5 +899,4 @@ input:checked + .toggle-slider:before {
     min-width: 3rem;
     min-height: 3rem;
   }
->>>>>>> 0db8f58dc89996ce94a2c0b980d47c12079c1757
 }

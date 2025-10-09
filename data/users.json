@@ -74,16 +74,76 @@
     "email": "emma.garcia@example.com",
     "is_verified": true
   },
-  "34567890p": {
-    "id": "e49fa045-6296-42e9-8c89-0ae85959efe9",
-    "phone": "34567890p",
-    "name": "User",
-    "role": "citizen",
+  "+12025550100": {
+    "id": "admin-001",
+    "phone": "+12025550100",
+    "name": "Admin User",
+    "role": "admin",
+    "email": "admin@safenow.com",
     "is_verified": true
   },
-  "wertyuio": {
-    "id": "7548d691-9a8a-4348-b5de-6a96fe07323d",
-    "phone": "wertyuio",
+  "+12025550101": {
+    "id": "volunteer-001",
+    "phone": "+12025550101",
+    "name": "John Doe",
+    "role": "volunteer",
+    "email": "john.doe@safenow.com",
+    "is_verified": true,
+    "specialization": "Medical"
+  },
+  "+12025550102": {
+    "id": "volunteer-002",
+    "phone": "+12025550102",
+    "name": "Jane Smith",
+    "role": "volunteer",
+    "email": "jane.smith@safenow.com",
+    "is_verified": true,
+    "specialization": "Fire & Rescue"
+  },
+  "+12025550103": {
+    "id": "volunteer-003",
+    "phone": "+12025550103",
+    "name": "Mike Johnson",
+    "role": "volunteer",
+    "email": "mike.johnson@safenow.com",
+    "is_verified": true,
+    "specialization": "Police"
+  },
+  "+12025550104": {
+    "id": "citizen-001",
+    "phone": "+12025550104",
+    "name": "Alice Brown",
+    "role": "citizen",
+    "email": "alice.brown@example.com",
+    "is_verified": true
+  },
+  "+12025550105": {
+    "id": "citizen-002",
+    "phone": "+12025550105",
+    "name": "Bob Wilson",
+    "role": "citizen",
+    "email": "bob.wilson@example.com",
+    "is_verified": true
+  },
+  "+12025550106": {
+    "id": "citizen-003",
+    "phone": "+12025550106",
+    "name": "Carol Davis",
+    "role": "citizen",
+    "email": "carol.davis@example.com",
+    "is_verified": true
+  },
+  "+12025550107": {
+    "id": "citizen-004",
+    "phone": "+12025550107",
+    "name": "David Miller",
+    "role": "citizen",
+    "email": "david.miller@example.com",
+    "is_verified": true
+  },
+  "9041581066": {
+    "id": "3b102a12-782c-402d-9d8a-df0019745b95",
+    "phone": "9041581066",
     "name": "User",
     "role": "citizen",
     "is_verified": true
@@ -161,13 +221,6 @@
     "name": "Emma Garcia",
     "role": "citizen",
     "email": "emma.garcia@example.com",
-    "is_verified": true
-  },
-  "123456789": {
-    "id": "f282a89a-3281-446f-a743-36bc86c061af",
-    "phone": "123456789",
-    "name": "User",
-    "role": "citizen",
     "is_verified": true
   }
 }
