@@ -74,76 +74,98 @@
     "email": "emma.garcia@example.com",
     "is_verified": true
   },
-  "+12025550100": {
+  "34567890p": {
+    "id": "e49fa045-6296-42e9-8c89-0ae85959efe9",
+    "phone": "34567890p",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "wertyuio": {
+    "id": "7548d691-9a8a-4348-b5de-6a96fe07323d",
+    "phone": "wertyuio",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "+919876543210": {
     "id": "admin-001",
-    "phone": "+12025550100",
+    "phone": "+919876543210",
     "name": "Admin User",
     "role": "admin",
     "email": "admin@safenow.com",
     "is_verified": true
   },
-  "+12025550101": {
+  "+919876543211": {
     "id": "volunteer-001",
-    "phone": "+12025550101",
+    "phone": "+919876543211",
     "name": "John Doe",
     "role": "volunteer",
     "email": "john.doe@safenow.com",
     "is_verified": true,
     "specialization": "Medical"
   },
-  "+12025550102": {
+  "+919876543212": {
     "id": "volunteer-002",
-    "phone": "+12025550102",
+    "phone": "+919876543212",
     "name": "Jane Smith",
     "role": "volunteer",
     "email": "jane.smith@safenow.com",
     "is_verified": true,
     "specialization": "Fire & Rescue"
   },
-  "+12025550103": {
+  "+919876543213": {
     "id": "volunteer-003",
-    "phone": "+12025550103",
+    "phone": "+919876543213",
     "name": "Mike Johnson",
     "role": "volunteer",
     "email": "mike.johnson@safenow.com",
     "is_verified": true,
     "specialization": "Police"
   },
-  "+12025550104": {
+  "+919876543214": {
     "id": "citizen-001",
-    "phone": "+12025550104",
+    "phone": "+919876543214",
     "name": "Alice Brown",
     "role": "citizen",
     "email": "alice.brown@example.com",
     "is_verified": true
   },
-  "+12025550105": {
+  "+919876543215": {
     "id": "citizen-002",
-    "phone": "+12025550105",
+    "phone": "+919876543215",
     "name": "Bob Wilson",
     "role": "citizen",
     "email": "bob.wilson@example.com",
     "is_verified": true
   },
-  "+12025550106": {
+  "+919876543216": {
     "id": "citizen-003",
-    "phone": "+12025550106",
+    "phone": "+919876543216",
     "name": "Carol Davis",
     "role": "citizen",
     "email": "carol.davis@example.com",
     "is_verified": true
   },
-  "+12025550107": {
+  "+919876543217": {
     "id": "citizen-004",
-    "phone": "+12025550107",
+    "phone": "+919876543217",
     "name": "David Miller",
     "role": "citizen",
     "email": "david.miller@example.com",
     "is_verified": true
   },
-  "9041581066": {
-    "id": "3b102a12-782c-402d-9d8a-df0019745b95",
-    "phone": "9041581066",
+  "+919876543218": {
+    "id": "citizen-005",
+    "phone": "+919876543218",
+    "name": "Emma Garcia",
+    "role": "citizen",
+    "email": "emma.garcia@example.com",
+    "is_verified": true
+  },
+  "123456789": {
+    "id": "f282a89a-3281-446f-a743-36bc86c061af",
+    "phone": "123456789",
     "name": "User",
     "role": "citizen",
     "is_verified": true

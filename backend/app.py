@@ -176,7 +176,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def create_alert(a: AlertCreate, user=Depends(get_current_user)):
     alert_id = str(uuid.uuid4())
     alert = a.dict()
-    alert.update({"id": alert_id, "user_id": user.get('sub'), "status": "pending", "created_at": None})
+    current_time = datetime.utcnow().isoformat()
+    alert.update({
+        "id": alert_id, 
+        "user_id": user.get('sub'), 
+        "status": "pending", 
+        "created_at": current_time,
+        "updated_at": current_time
+    })
     
     # Always persist to DB first (with fallback to memory for demo)
     insert_q = """INSERT INTO alerts (id, user_id, type, status, created_at, updated_at, location, 

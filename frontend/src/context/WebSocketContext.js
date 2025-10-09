@@ -345,6 +345,39 @@ export const WebSocketProvider = ({ children }) => {
     }
   };
 
+  const sendAlert = async (alertData) => {
+    try {
+      const headers = getAuthHeaders();
+      const response = await axios.post(`${API_BASE_URL}/alerts`, alertData, { headers });
+      
+      if (response.data.success) {
+        // Add to local state immediately for responsive UI
+        const newAlert = response.data.alert;
+        setAlerts(prev => [newAlert, ...prev]);
+        
+        // Send via WebSocket for real-time updates to other users
+        if (socket && connectionStatus === 'connected') {
+          sendMessage({
+            type: 'new_alert',
+            data: newAlert
+          });
+        }
+        
+        // Refresh from database to ensure consistency
+        setTimeout(() => {
+          loadAlertsFromDatabase();
+        }, 1000);
+        
+        return response.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to create alert');
+      }
+    } catch (error) {
+      console.error('Error sending alert:', error);
+      throw error;
+    }
+  };
+
   const value = {
     socket,
     connectionStatus,
@@ -354,6 +387,7 @@ export const WebSocketProvider = ({ children }) => {
     connect,
     disconnect,
     sendMessage,
+    sendAlert,
     clearNotification,
     clearAllNotifications,
     setAlerts,

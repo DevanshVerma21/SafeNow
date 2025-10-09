@@ -1,88 +1,38 @@
 {
-  "5653d068-988e-4d93-95c4-03e562c138bc": {
-    "type": "fire",
-    "note": "Emergency alert from mobile app - Fire Emergency",
+  "19b0ae51-005b-43f4-95e0-9920d4dcf3db": {
+    "type": "safety",
+    "note": "Emergency alert from mobile app - Personal Safety",
     "location": {
-      "lat": 28.5441315,
-      "lng": 77.334459,
-      "accuracy": 212.0,
+      "lat": 28.5550417,
+      "lng": 77.3431992,
+      "accuracy": 2101.9655117712564,
       "address": null
     },
     "attachments": [],
     "severity": 3,
-    "id": "5653d068-988e-4d93-95c4-03e562c138bc",
+    "id": "19b0ae51-005b-43f4-95e0-9920d4dcf3db",
     "user_id": "admin-001",
     "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T06:41:33.632645",
-    "marked_done_at": "2025-10-09T06:41:33.632645"
+    "created_at": "2025-10-09T10:35:36.201879",
+    "updated_at": "2025-10-09T10:35:36.201879",
+    "resolved_at": "2025-10-09T10:36:04.519948",
+    "marked_done_at": "2025-10-09T10:36:04.519948"
   },
-  "144d8c96-c000-4e07-862b-f2ffd0ef2e69": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
+  "ef51d9a8-cfe1-4ab5-acb1-c62d780051f1": {
+    "type": "police",
+    "note": "Emergency alert from mobile app - Police Emergency",
     "location": {
-      "lat": 28.545579712020427,
-      "lng": 77.33441543175147,
-      "accuracy": 62.0,
+      "lat": 28.5550417,
+      "lng": 77.3431992,
+      "accuracy": 2101.9655117712564,
       "address": null
     },
     "attachments": [],
     "severity": 3,
-    "id": "144d8c96-c000-4e07-862b-f2ffd0ef2e69",
+    "id": "ef51d9a8-cfe1-4ab5-acb1-c62d780051f1",
     "user_id": "admin-001",
-    "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T06:42:20.421525",
-    "marked_done_at": "2025-10-09T06:42:20.421525"
-  },
-  "e211313b-e2b6-4487-bbfb-4542a0fd50e3": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
-    "location": {
-      "lat": 28.545579712020427,
-      "lng": 77.33441543175147,
-      "accuracy": 62.0,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "e211313b-e2b6-4487-bbfb-4542a0fd50e3",
-    "user_id": "admin-001",
-    "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T06:43:07.277443",
-    "marked_done_at": "2025-10-09T06:43:07.277443"
-  },
-  "42fc7922-ebf1-41f9-8e3b-8dc0ae678c21": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
-    "location": {
-      "lat": 28.545579712020427,
-      "lng": 77.33441543175147,
-      "accuracy": 62.0,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "42fc7922-ebf1-41f9-8e3b-8dc0ae678c21",
-    "user_id": "admin-001",
-    "status": "active",
-    "created_at": null
-  },
-  "53c26bec-125c-44f2-80d2-314606051d0a": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
-    "location": {
-      "lat": 28.545579712020427,
-      "lng": 77.33441543175147,
-      "accuracy": 62.0,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "53c26bec-125c-44f2-80d2-314606051d0a",
-    "user_id": "admin-001",
-    "status": "active",
-    "created_at": null
+    "status": "pending",
+    "created_at": "2025-10-09T10:35:53.668352",
+    "updated_at": "2025-10-09T10:35:53.668352"
   }
 }

@@ -22,6 +22,10 @@
   --blur-md: 8px;
   --blur-lg: 16px;
   --blur-xl: 24px;
+  
+  /* Sidebar specific variables */
+  --sidebar-width: 320px;
+  --sidebar-z-index: 45;
 }
 
 [data-theme="dark"] {
@@ -712,6 +716,123 @@ input:checked + .toggle-slider:before {
   }
 }
 
+<<<<<<< HEAD
+/* Sidebar Styles */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: var(--sidebar-z-index);
+}
+
+.sidebar-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-menu-item:hover {
+  background-color: #f9fafb;
+  transform: translateX(4px);
+}
+
+.sidebar-menu-item.active {
+  background: linear-gradient(to right, #eff6ff, #faf5ff);
+  color: #1d4ed8;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border-left: 3px solid #3b82f6;
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  transition: color 0.2s ease;
+}
+
+.sidebar-icon.active {
+  color: #2563eb;
+}
+
+.sidebar-icon:not(.active) {
+  color: #6b7280;
+}
+
+.sidebar-menu-item:hover .sidebar-icon:not(.active) {
+  color: #374151;
+}
+
+.sidebar-badge {
+  background-color: #ef4444;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  min-width: 20px;
+  text-align: center;
+  animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Main content responsive spacing */
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.main-content.sidebar-expanded {
+  margin-left: 280px;
+}
+
+.main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-content.sidebar-expanded,
+  .main-content.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
+
+/* Smooth scrolling for sidebar content */
+.sidebar-container * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.sidebar-container *::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-container *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-container *::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 2px;
+}
+
+.sidebar-container *::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+=======
 /* Emergency Contacts Section - Custom Styles */
 .emergency-contact-card {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -778,4 +899,5 @@ input:checked + .toggle-slider:before {
     min-width: 3rem;
     min-height: 3rem;
   }
+>>>>>>> 0db8f58dc89996ce94a2c0b980d47c12079c1757
 }
