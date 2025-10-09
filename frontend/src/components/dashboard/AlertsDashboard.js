@@ -24,6 +24,31 @@ const AlertsDashboard = () => {
   });
   const [activeTab, setActiveTab] = useState('pending');
 
+  // Helper function to safely format timestamps
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'recently';
+    
+    try {
+      const date = new Date(timestamp);
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'recently';
+      }
+      
+      // Check if the date is too far in the past (likely invalid)
+      const now = new Date();
+      const diffInYears = (now - date) / (1000 * 60 * 60 * 24 * 365);
+      if (diffInYears > 1) {
+        return 'recently';
+      }
+      
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting timestamp:', timestamp, error);
+      return 'recently';
+    }
+  };
+
   const isResponder = user?.role === 'responder' || user?.role === 'admin';
 
   const getStatusIcon = (status) => {
@@ -169,7 +194,7 @@ const AlertsDashboard = () => {
             <div className="flex items-center text-xs text-gray-500 mt-2 space-x-4">
               <div className="flex items-center">
                 <ClockIcon className="w-3 h-3 mr-1" />
-                {formatDistanceToNow(new Date(alert.created_at), { addSuffix: true })}
+                {formatTimestamp(alert.created_at)}
               </div>
               
               {alert.location && (
@@ -183,7 +208,7 @@ const AlertsDashboard = () => {
                 <div className="flex items-center">
                   <CheckCircleIcon className="w-3 h-3 mr-1 text-green-600" />
                   <span className="text-green-600">
-                    Resolved {formatDistanceToNow(new Date(alert.resolved_at), { addSuffix: true })}
+                    Resolved {formatTimestamp(alert.resolved_at)}
                   </span>
                 </div>
               )}

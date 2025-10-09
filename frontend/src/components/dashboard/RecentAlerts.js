@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { 
   ExclamationTriangleIcon,
   ClockIcon,
@@ -19,6 +20,31 @@ const RecentAlerts = () => {
   const [recentAlerts, setRecentAlerts] = useState([]);
 
   const isResponder = user?.role === 'responder' || user?.role === 'admin';
+
+  // Helper function to safely format timestamps
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'recently';
+    
+    try {
+      const date = new Date(timestamp);
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return 'recently';
+      }
+      
+      // Check if the date is too far in the past (likely invalid)
+      const now = new Date();
+      const diffInYears = (now - date) / (1000 * 60 * 60 * 24 * 365);
+      if (diffInYears > 1) {
+        return 'recently';
+      }
+      
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting timestamp:', timestamp, error);
+      return 'recently';
+    }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -82,6 +108,7 @@ const RecentAlerts = () => {
       setRecentAlerts(response.data);
     } catch (error) {
       console.error('Error fetching recent alerts:', error);
+      toast.error('Failed to load recent alerts');
     }
   };
 
@@ -170,7 +197,7 @@ const RecentAlerts = () => {
                         <div className="flex items-center space-x-1">
                           <CheckCircleIcon className="w-3 h-3 text-green-600" />
                           <span className="text-green-600 font-medium">
-                            Resolved {formatDistanceToNow(new Date(alert.resolved_at || alert.marked_done_at || Date.now()), { addSuffix: true })}
+                            Resolved {formatTimestamp(alert.resolved_at || alert.marked_done_at)}
                           </span>
                         </div>
                       </div>

@@ -152,7 +152,7 @@ const ModernSOSButton = () => {
         source: 'mobile_app'
       };
 
-      const response = await axios.post(`${API_BASE}/api/alerts`, alertData, {
+      const response = await axios.post(`${API_BASE}/alerts`, alertData, {
         headers: getAuthHeaders()
       });
 

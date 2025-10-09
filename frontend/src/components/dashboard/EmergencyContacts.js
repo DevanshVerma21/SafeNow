@@ -14,21 +14,21 @@ const EmergencyContacts = () => {
     {
       id: 1,
       name: 'Emergency Services',
-      phone: '911',
+      phone: '100',
       type: 'emergency',
       priority: 1
     },
     {
       id: 2,
       name: 'Family Contact',
-      phone: '+1-555-0123',
+      phone: '+91-98765-43210',
       type: 'family',
       priority: 2
     },
     {
       id: 3,
       name: 'Work Security',
-      phone: '+1-555-0456',
+      phone: '+91-87654-32109',
       type: 'work',
       priority: 3
     }
@@ -201,11 +201,11 @@ const EmergencyContacts = () => {
       {/* Quick Call Button */}
       <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
         <button
-          onClick={() => handleCall('911')}
+          onClick={() => handleCall('100')}
           className="w-full flex items-center justify-center space-x-2 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
         >
           <PhoneIcon className="w-5 h-5" />
-          <span>Emergency Call 911</span>
+          <span>Emergency Call 100</span>
         </button>
       </div>
     </div>
