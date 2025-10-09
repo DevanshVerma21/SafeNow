@@ -47,5 +47,13 @@ class AlertOut(AlertCreate):
 
 
 class AlertStatusUpdate(BaseModel):
-    status: str = Field(..., description='open | assigned | in_progress | done | cancelled')
+    status: str = Field(..., description='pending | assigned | in_progress | resolved | cancelled')
     note: Optional[str] = None
+
+
+class AlertSummary(BaseModel):
+    """Summary for dashboard display"""
+    pending_count: int
+    in_progress_count: int
+    resolved_count: int
+    total_count: int

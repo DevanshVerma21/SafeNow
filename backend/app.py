@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime, timedelta
 import uvicorn
 from backend.auth import create_access_token, verify_token, mock_send_otp, verify_otp_code
-from backend.schemas import UserCreate, OTPRequest, OTPVerify, AlertCreate, AlertOut
+from backend.schemas import UserCreate, OTPRequest, OTPVerify, AlertCreate, AlertOut, AlertStatusUpdate
 import uuid
 import asyncio
 from backend.db import database
@@ -140,7 +140,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 async def create_alert(a: AlertCreate, user=Depends(get_current_user)):
     alert_id = str(uuid.uuid4())
     alert = a.dict()
-    alert.update({"id": alert_id, "user_id": user.get('sub'), "status": "active", "created_at": None})
+    alert.update({"id": alert_id, "user_id": user.get('sub'), "status": "pending", "created_at": None})
     
     # Always persist to DB first (with fallback to memory for demo)
     insert_q = """INSERT INTO alerts (id, user_id, type, status, created_at, updated_at, location, 
@@ -296,13 +296,106 @@ async def get_user_recent_alerts(user=Depends(get_current_user)):
         return recent_alerts
 
 
+@app.get('/alerts/user/dashboard')
+async def get_user_dashboard_alerts(user=Depends(get_current_user)):
+    """Get user's alerts organized by status for dashboard display."""
+    try:
+        user_id = user.get('sub')
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        
+        # Get pending/active alerts (not time limited)
+        pending_query = """SELECT a.*, u.phone as user_phone, u.name as user_name
+                          FROM alerts a
+                          LEFT JOIN users u ON a.user_id = u.id
+                          WHERE a.user_id = :user_id
+                            AND a.status IN ('pending', 'assigned', 'in_progress')
+                          ORDER BY a.created_at DESC
+                          LIMIT 10"""
+        
+        # Get resolved alerts (last 24 hours)
+        resolved_query = """SELECT a.*, u.phone as user_phone, u.name as user_name
+                           FROM alerts a
+                           LEFT JOIN users u ON a.user_id = u.id
+                           WHERE a.user_id = :user_id
+                             AND a.status IN ('resolved', 'done')
+                             AND (a.resolved_at >= :cutoff_time OR a.marked_done_at >= :cutoff_time)
+                           ORDER BY COALESCE(a.resolved_at, a.marked_done_at) DESC
+                           LIMIT 10"""
+        
+        pending_rows = await database.fetch_all(pending_query, values={"user_id": user_id})
+        resolved_rows = await database.fetch_all(resolved_query, values={
+            "user_id": user_id,
+            "cutoff_time": cutoff_time
+        })
+        
+        pending_alerts = [dict(row) for row in pending_rows]
+        resolved_alerts = [dict(row) for row in resolved_rows]
+        
+        # Convert datetime objects to ISO strings
+        for alerts_list in [pending_alerts, resolved_alerts]:
+            for alert in alerts_list:
+                for field in ['created_at', 'updated_at', 'resolved_at', 'marked_done_at']:
+                    if alert.get(field):
+                        alert[field] = alert[field].isoformat()
+        
+        result = {
+            "pending": pending_alerts,
+            "resolved": resolved_alerts,
+            "summary": {
+                "pending_count": len(pending_alerts),
+                "resolved_count": len(resolved_alerts)
+            }
+        }
+        
+        print(f"✅ Retrieved dashboard alerts for user {user_id}: {len(pending_alerts)} pending, {len(resolved_alerts)} resolved")
+        return result
+        
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        user_id = user.get('sub')
+        cutoff_time = datetime.utcnow() - timedelta(hours=24)
+        
+        print(f"🔍 Debug: Looking for user_id '{user_id}' in {len(ALERTS)} alerts")
+        print(f"🔍 Available user_ids in alerts: {set(alert.get('user_id') for alert in ALERTS.values())}")
+        
+        pending_alerts = []
+        resolved_alerts = []
+        
+        for alert in ALERTS.values():
+            print(f"🔍 Alert {alert.get('id')}: user_id={alert.get('user_id')}, status={alert.get('status')}")
+            if alert.get('user_id') == user_id:
+                if alert.get('status') in ['pending', 'assigned', 'in_progress']:
+                    pending_alerts.append(alert)
+                elif alert.get('status') in ['resolved', 'done']:
+                    resolved_at = alert.get('resolved_at') or alert.get('marked_done_at')
+                    if resolved_at:
+                        try:
+                            resolved_dt = datetime.fromisoformat(resolved_at.replace('Z', '+00:00'))
+                            print(f"🔍 Resolved alert: {alert.get('id')}, resolved_at: {resolved_at}, parsed: {resolved_dt}, cutoff: {cutoff_time}")
+                            if resolved_dt >= cutoff_time:
+                                resolved_alerts.append(alert)
+                        except Exception as parse_error:
+                            print(f"⚠️ Date parse error for alert {alert.get('id')}: {parse_error}")
+                            resolved_alerts.append(alert)
+        
+        return {
+            "pending": pending_alerts[:10],
+            "resolved": resolved_alerts[:10],
+            "summary": {
+                "pending_count": len(pending_alerts),
+                "resolved_count": len(resolved_alerts)
+            }
+        }
+
+
 @app.get('/alerts')
-async def list_alerts(status: str = "open"):
-    """Get all alerts with optional status filter. Defaults to open alerts only."""
+async def list_alerts(status: str = "pending"):
+    """Get all alerts with optional status filter. Defaults to pending alerts only."""
     try:
         # Always fetch from database for single source of truth
-        if status == "open":
-            query = "SELECT * FROM alerts WHERE status IN ('open', 'assigned', 'in_progress') ORDER BY created_at DESC"
+        if status == "pending":
+            query = "SELECT * FROM alerts WHERE status IN ('pending', 'assigned', 'in_progress') ORDER BY created_at DESC"
         else:
             query = "SELECT * FROM alerts ORDER BY created_at DESC"
         
@@ -320,19 +413,19 @@ async def list_alerts(status: str = "open"):
     except Exception as e:
         print(f"⚠️ Database error, using fallback memory storage: {e}")
         # Fallback to in-memory storage
-        if status == "open":
-            return [alert for alert in ALERTS.values() if alert.get('status') in ['open', 'assigned', 'in_progress']]
+        if status == "pending":
+            return [alert for alert in ALERTS.values() if alert.get('status') in ['pending', 'assigned', 'in_progress']]
         return list(ALERTS.values())
 
 
 @app.get('/alerts/open')
 async def get_open_alerts(user=Depends(get_current_user)):
-    """Get all active alerts for admin dashboard."""
+    """Get all pending/active alerts for admin dashboard."""
     try:
         query = """SELECT a.*, u.phone as user_phone, u.name as user_name
                    FROM alerts a
                    LEFT JOIN users u ON a.user_id = u.id
-                   WHERE a.status IN ('active', 'open', 'assigned', 'in_progress')
+                   WHERE a.status IN ('pending', 'assigned', 'in_progress')
                    ORDER BY a.created_at DESC"""
         
         rows = await database.fetch_all(query)
@@ -349,7 +442,7 @@ async def get_open_alerts(user=Depends(get_current_user)):
     except Exception as e:
         print(f"⚠️ Database error: {e}")
         # Fallback to in-memory
-        return [alert for alert in ALERTS.values() if alert.get('status') in ['active', 'open', 'assigned', 'in_progress']]
+        return [alert for alert in ALERTS.values() if alert.get('status') in ['pending', 'assigned', 'in_progress']]
 
 
 @app.get('/alerts/recent')
@@ -510,6 +603,131 @@ async def mark_alert_done(alert_id: str, user=Depends(get_current_user)):
             await broadcast_alert(broadcast_data)
             
             return {"success": True, "message": "Alert marked as resolved (memory)", "alert_id": alert_id}
+        else:
+            raise HTTPException(status_code=404, detail="Alert not found")
+
+
+@app.put('/alerts/{alert_id}/status')
+async def update_alert_status(alert_id: str, status_update: AlertStatusUpdate, user=Depends(get_current_user)):
+    """Update alert status with proper transitions."""
+    try:
+        # Get current alert to validate transition
+        alert_query = "SELECT * FROM alerts WHERE id = :alert_id"
+        alert_row = await database.fetch_one(alert_query, values={"alert_id": alert_id})
+        
+        if not alert_row:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        
+        current_status = alert_row['status']
+        new_status = status_update.status
+        
+        # Validate status transitions
+        valid_transitions = {
+            'pending': ['assigned', 'in_progress', 'resolved', 'cancelled'],
+            'assigned': ['in_progress', 'resolved', 'cancelled'],
+            'in_progress': ['resolved', 'cancelled'],
+            'resolved': [],  # Cannot change from resolved
+            'cancelled': []  # Cannot change from cancelled
+        }
+        
+        if new_status not in valid_transitions.get(current_status, []):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Invalid status transition from '{current_status}' to '{new_status}'"
+            )
+        
+        # Update in database
+        update_fields = ["status = :status", "updated_at = now()"]
+        update_values = {"alert_id": alert_id, "status": new_status}
+        
+        # Set resolved_at if marking as resolved
+        if new_status == 'resolved':
+            resolved_time = datetime.utcnow()
+            update_fields.append("resolved_at = :resolved_time")
+            update_fields.append("marked_done_at = :resolved_time")
+            update_values["resolved_time"] = resolved_time
+        
+        update_query = f"UPDATE alerts SET {', '.join(update_fields)} WHERE id = :alert_id"
+        
+        result = await database.execute(update_query, values=update_values)
+        
+        if result:
+            # Get updated alert data
+            updated_alert_row = await database.fetch_one(alert_query, values={"alert_id": alert_id})
+            updated_alert = dict(updated_alert_row)
+            
+            # Convert datetime objects to ISO strings
+            for field in ['created_at', 'updated_at', 'resolved_at', 'marked_done_at']:
+                if updated_alert.get(field):
+                    updated_alert[field] = updated_alert[field].isoformat()
+            
+            # Broadcast update to all connected clients
+            broadcast_data = {
+                "type": "alert_status_changed",
+                "action": "status_updated",
+                "alert": updated_alert,
+                "alert_id": alert_id,
+                "old_status": current_status,
+                "new_status": new_status,
+                "note": status_update.note
+            }
+            await broadcast_alert(broadcast_data)
+            
+            print(f"✅ Alert {alert_id} status updated from '{current_status}' to '{new_status}'")
+            return {
+                "success": True, 
+                "message": f"Alert status updated to {new_status}",
+                "alert": updated_alert
+            }
+        else:
+            raise HTTPException(status_code=400, detail="Failed to update alert status")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"⚠️ Database error: {e}")
+        # Fallback to in-memory
+        if alert_id in ALERTS:
+            current_status = ALERTS[alert_id].get('status')
+            
+            # Apply same validation
+            valid_transitions = {
+                'pending': ['assigned', 'in_progress', 'resolved', 'cancelled'],
+                'assigned': ['in_progress', 'resolved', 'cancelled'],
+                'in_progress': ['resolved', 'cancelled'],
+                'resolved': [],
+                'cancelled': []
+            }
+            
+            if status_update.status not in valid_transitions.get(current_status, []):
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Invalid status transition from '{current_status}' to '{status_update.status}'"
+                )
+            
+            # Update in memory
+            ALERTS[alert_id]['status'] = status_update.status
+            if status_update.status == 'resolved':
+                resolved_time = datetime.utcnow().isoformat()
+                ALERTS[alert_id]['resolved_at'] = resolved_time
+                ALERTS[alert_id]['marked_done_at'] = resolved_time
+            
+            # Broadcast update
+            broadcast_data = {
+                "type": "alert_status_changed",
+                "action": "status_updated",
+                "alert_id": alert_id,
+                "old_status": current_status,
+                "new_status": status_update.status,
+                "note": status_update.note
+            }
+            await broadcast_alert(broadcast_data)
+            
+            return {
+                "success": True, 
+                "message": f"Alert status updated to {status_update.status} (memory)",
+                "alert": ALERTS[alert_id]
+            }
         else:
             raise HTTPException(status_code=404, detail="Alert not found")
 

@@ -73,5 +73,33 @@
     "role": "citizen",
     "email": "emma.garcia@example.com",
     "is_verified": true
+  },
+  "234567": {
+    "id": "9b2c28a6-29af-4c05-9669-06de34a030b0",
+    "phone": "234567",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "3456789876543": {
+    "id": "654856b8-8950-4e55-a2d1-ba6a5133d23d",
+    "phone": "3456789876543",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "12345678": {
+    "id": "462083a8-c1cf-4185-ac85-ffdfc789b075",
+    "phone": "12345678",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "23456789": {
+    "id": "011da83f-6ea1-4d44-9f06-3b7195f3442d",
+    "phone": "23456789",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
   }
 }

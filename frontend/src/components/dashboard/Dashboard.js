@@ -6,7 +6,7 @@ import { useLocation } from '../../context/LocationContext';
 import SOSButton from './SOSButton';
 import QuickActions from './QuickActions';
 import EmergencyContacts from './EmergencyContacts';
-import RecentAlerts from './RecentAlerts';
+import AlertsDashboard from './AlertsDashboard';
 import LocationStatus from './LocationStatus';
 import LiveMap from './LiveMap';
 import SafetyTips from './SafetyTips';
@@ -182,13 +182,13 @@ const Dashboard = () => {
               <LiveMap />
             </motion.div>
 
-            {/* Recent Alerts */}
+            {/* Alerts Dashboard */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <RecentAlerts />
+              <AlertsDashboard />
             </motion.div>
           </div>
 
