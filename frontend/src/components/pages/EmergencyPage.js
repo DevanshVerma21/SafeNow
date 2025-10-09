@@ -19,6 +19,9 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
+// Add at the top of the file after imports
+const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
+
 const EmergencyPage = () => {
   const { user } = useAuth();
   const { sendAlert } = useWebSocket();
@@ -114,7 +117,7 @@ const EmergencyPage = () => {
       // Upload media if captured
       if (capturedMedia.hasMedia) {
         try {
-          const mediaUploadResponse = await fetch('http://localhost:8000/alerts/upload_media', {
+          const mediaUploadResponse = await fetch(`${API_BASE}/alerts/upload_media`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

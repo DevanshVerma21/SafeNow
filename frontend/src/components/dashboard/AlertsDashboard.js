@@ -14,6 +14,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
+const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
+
 const AlertsDashboard = () => {
   const { alerts, markAlertAsDone } = useWebSocket();
   const { user, getAuthHeaders } = useAuth();
@@ -133,7 +135,7 @@ const AlertsDashboard = () => {
   // Fetch user's dashboard alerts (both pending and resolved)
   const fetchDashboardData = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/alerts/user/dashboard', {
+      const response = await axios.get(`${API_BASE}/alerts/user/dashboard`, {
         headers: getAuthHeaders()
       });
       setDashboardData(response.data);
@@ -245,13 +247,13 @@ const AlertsDashboard = () => {
                     {alert.photo_urls.map((photoUrl, photoIndex) => (
                       <a
                         key={photoIndex}
-                        href={`http://localhost:8000${photoUrl}`}
+                        href={`${API_BASE}${photoUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group relative"
                       >
                         <img
-                          src={`http://localhost:8000${photoUrl}`}
+                          src={`${API_BASE}${photoUrl}`}
                           alt={`Evidence ${photoIndex + 1}`}
                           className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300 group-hover:border-blue-500 transition-all"
                         />
@@ -271,7 +273,7 @@ const AlertsDashboard = () => {
                       className="w-full h-8"
                       style={{ maxHeight: '32px' }}
                     >
-                      <source src={`http://localhost:8000${alert.audio_url}`} type="audio/webm" />
+                      <source src={`${API_BASE}${alert.audio_url}`} type="audio/webm" />
                       Your browser does not support audio playback.
                     </audio>
                   </div>

@@ -10,6 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
+const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
+
 const EmergencyContacts = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ const EmergencyContacts = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/emergency-contacts', {
+      const response = await axios.get(`${API_BASE}/emergency-contacts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setContacts(response.data);
@@ -69,7 +71,7 @@ const EmergencyContacts = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:8000/emergency-contacts',
+        `${API_BASE}/emergency-contacts`,
         {
           name: newContact.name.trim(),
           phone: newContact.phone.trim(),
@@ -104,7 +106,7 @@ const EmergencyContacts = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:8000/emergency-contacts/${id}`, {
+      await axios.delete(`${API_BASE}/emergency-contacts/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

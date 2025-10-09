@@ -14,6 +14,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
+const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
+
 const RecentAlerts = () => {
   const { alerts, markAlertAsDone } = useWebSocket();
   const { user, getAuthHeaders } = useAuth();
@@ -102,7 +104,7 @@ const RecentAlerts = () => {
   // Fetch user's recent resolved alerts
   const fetchRecentAlerts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/alerts/user/recent', {
+      const response = await axios.get(`${API_BASE}/alerts/user/recent`, {
         headers: getAuthHeaders()
       });
       setRecentAlerts(response.data);
