@@ -711,3 +711,71 @@ input:checked + .toggle-slider:before {
     opacity: 0.5;
   }
 }
+
+/* Emergency Contacts Section - Custom Styles */
+.emergency-contact-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emergency-contact-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Ensure proper text truncation */
+.emergency-contact-card h4 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Smooth button interactions */
+.emergency-contact-card button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.emergency-contact-card button:active {
+  transform: scale(0.95);
+}
+
+/* Icon container consistent sizing */
+.emergency-contact-icon {
+  min-width: 3.5rem;
+  min-height: 3.5rem;
+}
+
+/* Phone call button animation */
+@keyframes phone-ring {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10%, 30% {
+    transform: rotate(-10deg);
+  }
+  20%, 40% {
+    transform: rotate(10deg);
+  }
+}
+
+.phone-ring:hover svg {
+  animation: phone-ring 0.8s ease-in-out;
+}
+
+/* Badge consistent styling */
+.contact-badge {
+  letter-spacing: 0.025em;
+  font-weight: 700;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .emergency-contact-card {
+    padding: 1rem;
+  }
+  
+  .emergency-contact-icon {
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+}

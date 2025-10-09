@@ -104,11 +104,22 @@ CREATE TABLE emergency_contacts (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
-  relationship TEXT, -- family, friend, doctor, etc.
+  relationship TEXT, -- family, friend, doctor, emergency, medical, fire, helpline, etc.
   priority INTEGER DEFAULT 1, -- 1=primary, 2=secondary
+  is_default BOOLEAN DEFAULT FALSE, -- true for system-wide default contacts
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- Insert default emergency contacts (system-wide, accessible to all users)
+INSERT INTO emergency_contacts (name, phone, relationship, priority, is_default, user_id) VALUES
+  ('Emergency Services (Police)', '100', 'emergency', 1, true, NULL),
+  ('Ambulance / Medical Emergency', '102', 'medical', 2, true, NULL),
+  ('Fire Department', '101', 'fire', 3, true, NULL),
+  ('Women Helpline', '1091', 'helpline', 4, true, NULL),
+  ('Child Helpline', '1098', 'helpline', 5, true, NULL),
+  ('National Emergency Number', '112', 'emergency', 6, true, NULL)
+ON CONFLICT DO NOTHING;
 
 -- ALERT CATEGORIES & SEVERITY
 CREATE TABLE alert_categories (
