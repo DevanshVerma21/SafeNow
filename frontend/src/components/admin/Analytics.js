@@ -46,7 +46,18 @@ const Analytics = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setAnalytics(data);
+        // Ensure all required properties exist with default values
+        setAnalytics({
+          totalUsers: data.totalUsers || 0,
+          totalAlerts: data.totalAlerts || 0,
+          activeAlerts: data.activeAlerts || 0,
+          resolvedAlerts: data.resolvedAlerts || 0,
+          averageResponseTime: data.averageResponseTime || 0,
+          responderCount: data.responderCount || 0,
+          dailyStats: Array.isArray(data.dailyStats) ? data.dailyStats : [],
+          alertsByType: data.alertsByType || {},
+          responseEfficiency: data.responseEfficiency || 0
+        });
       } else {
         // Fallback to demo data if API not available
         setAnalytics({
@@ -75,7 +86,7 @@ const Analytics = () => {
       }
     } catch (error) {
       console.error('Error fetching analytics:', error);
-      // Use demo data on error
+      // Use demo data on error with proper structure
       setAnalytics({
         totalUsers: 247,
         totalAlerts: 89,
@@ -83,6 +94,20 @@ const Analytics = () => {
         resolvedAlerts: 84,
         averageResponseTime: 4.2,
         responderCount: 32,
+        dailyStats: [
+          { date: '2025-10-05', alerts: 12, responses: 11 },
+          { date: '2025-10-06', alerts: 15, responses: 14 },
+          { date: '2025-10-07', alerts: 8, responses: 8 },
+          { date: '2025-10-08', alerts: 18, responses: 17 },
+          { date: '2025-10-09', alerts: 11, responses: 10 }
+        ],
+        alertsByType: {
+          'Medical': 35,
+          'Fire': 18,
+          'Police': 22,
+          'Natural Disaster': 8,
+          'Other': 6
+        },
         responseEfficiency: 94.4
       });
     } finally {
@@ -103,11 +128,11 @@ const Analytics = () => {
             <Icon className="w-6 h-6 text-white" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
+            <p className="text-sm font-medium text-gray-600">{title || 'Unknown'}</p>
+            <p className="text-2xl font-bold text-gray-900">{value || '0'}</p>
           </div>
         </div>
-        {trend && (
+        {trend !== undefined && trend !== null && (
           <div className={`flex items-center space-x-1 ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
             {trend > 0 ? (
               <ArrowTrendingUpIcon className="w-5 h-5" />
@@ -125,10 +150,10 @@ const Analytics = () => {
     <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
       <h3 className="text-lg font-bold text-gray-900 mb-6">Alerts by Type</h3>
       <div className="space-y-4">
-        {Object.entries(analytics.alertsByType).map(([type, count], index) => {
+        {analytics.alertsByType && Object.entries(analytics.alertsByType).map(([type, count], index) => {
           const colors = ['red', 'orange', 'blue', 'green', 'purple'];
           const color = colors[index % colors.length];
-          const percentage = (count / analytics.totalAlerts * 100).toFixed(1);
+          const percentage = analytics.totalAlerts > 0 ? (count / analytics.totalAlerts * 100).toFixed(1) : 0;
           
           return (
             <div key={type} className="flex items-center justify-between">
@@ -148,6 +173,11 @@ const Analytics = () => {
             </div>
           );
         })}
+        {(!analytics.alertsByType || Object.keys(analytics.alertsByType).length === 0) && (
+          <div className="text-center text-gray-500 py-8">
+            No alert data available
+          </div>
+        )}
       </div>
     </div>
   );
@@ -190,28 +220,28 @@ const Analytics = () => {
         <StatCard
           icon={UserGroupIcon}
           title="Total Users"
-          value={analytics.totalUsers}
+          value={analytics.totalUsers || 0}
           trend={12}
           color="blue"
         />
         <StatCard
           icon={ExclamationTriangleIcon}
           title="Total Alerts"
-          value={analytics.totalAlerts}
+          value={analytics.totalAlerts || 0}
           trend={-5}
           color="red"
         />
         <StatCard
           icon={ClockIcon}
           title="Avg Response Time"
-          value={`${analytics.averageResponseTime}m`}
+          value={`${analytics.averageResponseTime || 0}m`}
           trend={-8}
           color="green"
         />
         <StatCard
           icon={CheckCircleIcon}
           title="Response Rate"
-          value={`${analytics.responseEfficiency}%`}
+          value={`${analytics.responseEfficiency || 0}%`}
           trend={3}
           color="purple"
         />
@@ -228,7 +258,7 @@ const Analytics = () => {
             <h3 className="text-lg font-bold text-gray-900">Active Alerts</h3>
             <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
           </div>
-          <div className="text-3xl font-bold text-red-600 mb-2">{analytics.activeAlerts}</div>
+          <div className="text-3xl font-bold text-red-600 mb-2">{analytics.activeAlerts || 0}</div>
           <p className="text-sm text-gray-600">Requiring immediate attention</p>
         </motion.div>
 
@@ -241,7 +271,7 @@ const Analytics = () => {
             <h3 className="text-lg font-bold text-gray-900">Resolved Alerts</h3>
             <CheckCircleIcon className="w-6 h-6 text-green-500" />
           </div>
-          <div className="text-3xl font-bold text-green-600 mb-2">{analytics.resolvedAlerts}</div>
+          <div className="text-3xl font-bold text-green-600 mb-2">{analytics.resolvedAlerts || 0}</div>
           <p className="text-sm text-gray-600">Successfully handled</p>
         </motion.div>
 
@@ -254,7 +284,7 @@ const Analytics = () => {
             <h3 className="text-lg font-bold text-gray-900">Active Responders</h3>
             <MapPinIcon className="w-6 h-6 text-blue-500" />
           </div>
-          <div className="text-3xl font-bold text-blue-600 mb-2">{analytics.responderCount}</div>
+          <div className="text-3xl font-bold text-blue-600 mb-2">{analytics.responderCount || 0}</div>
           <p className="text-sm text-gray-600">Currently on duty</p>
         </motion.div>
       </div>
@@ -266,23 +296,29 @@ const Analytics = () => {
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
           <h3 className="text-lg font-bold text-gray-900 mb-6">Daily Activity</h3>
           <div className="space-y-4">
-            {analytics.dailyStats?.map((day, index) => (
-              <div key={day.date} className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-600">
-                  {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </span>
-                <div className="flex space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">{day.alerts} alerts</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">{day.responses} responses</span>
+            {analytics.dailyStats && Array.isArray(analytics.dailyStats) && analytics.dailyStats.length > 0 ? (
+              analytics.dailyStats.map((day, index) => (
+                <div key={day.date || index} className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-600">
+                    {day.date ? new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Unknown Date'}
+                  </span>
+                  <div className="flex space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">{day.alerts || 0} alerts</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <span className="text-sm text-gray-600">{day.responses || 0} responses</span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                No daily activity data available
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
