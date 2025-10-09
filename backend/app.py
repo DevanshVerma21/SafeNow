@@ -356,14 +356,10 @@ async def get_user_dashboard_alerts(user=Depends(get_current_user)):
         user_id = user.get('sub')
         cutoff_time = datetime.utcnow() - timedelta(hours=24)
         
-        print(f"🔍 Debug: Looking for user_id '{user_id}' in {len(ALERTS)} alerts")
-        print(f"🔍 Available user_ids in alerts: {set(alert.get('user_id') for alert in ALERTS.values())}")
-        
         pending_alerts = []
         resolved_alerts = []
         
         for alert in ALERTS.values():
-            print(f"🔍 Alert {alert.get('id')}: user_id={alert.get('user_id')}, status={alert.get('status')}")
             if alert.get('user_id') == user_id:
                 if alert.get('status') in ['pending', 'assigned', 'in_progress']:
                     pending_alerts.append(alert)
@@ -372,11 +368,10 @@ async def get_user_dashboard_alerts(user=Depends(get_current_user)):
                     if resolved_at:
                         try:
                             resolved_dt = datetime.fromisoformat(resolved_at.replace('Z', '+00:00'))
-                            print(f"🔍 Resolved alert: {alert.get('id')}, resolved_at: {resolved_at}, parsed: {resolved_dt}, cutoff: {cutoff_time}")
                             if resolved_dt >= cutoff_time:
                                 resolved_alerts.append(alert)
                         except Exception as parse_error:
-                            print(f"⚠️ Date parse error for alert {alert.get('id')}: {parse_error}")
+                            # If date parsing fails, include the alert anyway
                             resolved_alerts.append(alert)
         
         return {

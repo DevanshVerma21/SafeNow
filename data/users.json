@@ -101,5 +101,26 @@
     "name": "User",
     "role": "citizen",
     "is_verified": true
+  },
+  "1q23e4rt": {
+    "id": "2128b24b-9b81-401d-91f6-eee3fcfd6582",
+    "phone": "1q23e4rt",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "1234567890": {
+    "id": "67e22fde-c1de-4f2d-8bc7-bb5171139fd5",
+    "phone": "1234567890",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
+  },
+  "q23456789": {
+    "id": "5040494c-83bf-463a-9fe9-16edf5ed26f6",
+    "phone": "q23456789",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
   }
 }

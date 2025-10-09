@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
-// Import components (we'll create these)
-import LoginPage from './components/auth/LoginPage';
-import Dashboard from './components/dashboard/Dashboard';
+// Import modern components
+import ModernLoginPage from './components/auth/ModernLoginPage';
+import ModernDashboard from './components/dashboard/ModernDashboard';
 import ResponderDashboard from './components/responder/ResponderDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Header from './components/layout/Header';
@@ -97,7 +97,7 @@ function AppContent() {
             element={
               isAuthenticated ? 
                 <Navigate to={getDefaultDashboard()} replace /> : 
-                <LoginPage />
+                <ModernLoginPage />
             } 
           />
           
@@ -106,7 +106,7 @@ function AppContent() {
             path="/user-dashboard" 
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <ModernDashboard />
               </ProtectedRoute>
             } 
           />

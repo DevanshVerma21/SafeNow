@@ -93,40 +93,78 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 animate-fade-in">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 animate-fade-in relative">
+      {/* Floating background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-red-600/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }}></div>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full space-y-8"
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="max-w-md w-full space-y-8 relative z-10"
       >
         {/* Logo and title */}
         <div className="text-center">
           <motion.div
             animate={{ 
               scale: [1, 1.05, 1],
+              rotateY: [0, 10, 0],
             }}
             transition={{ 
-              duration: 2,
+              duration: 4,
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4"
+            className="mx-auto w-24 h-24 rounded-full flex items-center justify-center mb-6 relative"
             style={{
-              background: 'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)',
-              boxShadow: '0 10px 40px rgba(255, 8, 68, 0.4), 0 0 0 8px rgba(255, 8, 68, 0.1)'
+              background: 'linear-gradient(135deg, #ff0844 0%, #ff6b6b 50%, #ffb199 100%)',
+              boxShadow: '0 15px 35px rgba(255, 8, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.12), 0 0 0 8px rgba(255, 8, 68, 0.1)'
             }}
           >
-            <span className="text-white text-2xl font-bold">SOS</span>
+            <motion.span 
+              className="text-white text-3xl font-bold"
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              SOS
+            </motion.span>
+            
+            {/* Pulse ring */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-white/30"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.7, 0, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
           </motion.div>
           
-          <h2 className="text-3xl font-bold gradient-text">
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-4xl font-bold gradient-text mb-2"
+          >
+            SafeNow
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-lg text-neutral-600 font-medium"
+          >
             Emergency Response System
-          </h2>
-          <p className="mt-2 text-gray-600">
-            {step === 1 && "Enter your phone number"}
-            {step === 2 && "Enter the verification code"}
-          </p>
+          </motion.p>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-3 text-neutral-500"
+          >
+            {step === 1 && "Enter your phone number to get started"}
+            {step === 2 && "Enter the verification code sent to your phone"}
+          </motion.p>
         </div>
 
         {/* Phone Number Input */}
@@ -134,16 +172,25 @@ const LoginPage = () => {
           <motion.form
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
             onSubmit={handleRequestOTP}
             className="space-y-6"
           >
-            <div className="bg-white rounded-xl p-6 shadow-lg">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <motion.div 
+              className="glass-effect p-8"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <label className="block text-sm font-semibold text-neutral-700 mb-3">
                 Phone Number
               </label>
-              <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              <div className="relative group">
+                <motion.div
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 group-focus-within:text-primary-500 transition-colors duration-200"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <PhoneIcon className="w-5 h-5" />
+                </motion.div>
                 <input
                   type="tel"
                   required
@@ -152,12 +199,36 @@ const LoginPage = () => {
                     console.log('Input changed:', e.target.value);
                     setPhone(e.target.value);
                   }}
-                  onClick={() => console.log('Input clicked')}
-                  onFocus={() => console.log('Input focused')}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                  placeholder="+1234567890"
+                  className="w-full pl-12 pr-4 py-4 border-2 border-neutral-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 bg-white/80 backdrop-blur-sm transition-all duration-300 text-neutral-900 placeholder-neutral-400 font-medium"
+                  placeholder="+1 (555) 123-4567"
                   autoComplete="tel"
                   autoFocus
+                />
+              </div>
+              
+              <motion.button
+                type="submit"
+                disabled={loading || !phone.trim()}
+                className="w-full mt-6 modern-button py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="loading-dots">
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                    </div>
+                    <span>Sending Code...</span>
+                  </div>
+                ) : (
+                  'Send Verification Code'
+                )}
+              </motion.button>
+            </motion.div>
+          </motion.form>
+        )}
                   style={{ pointerEvents: 'auto', userSelect: 'text' }}
                 />
               </div>

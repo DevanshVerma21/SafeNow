@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useLocation } from '../../context/LocationContext';
@@ -13,7 +13,8 @@ import {
   ArrowRightOnRectangleIcon,
   SignalIcon,
   WifiIcon,
-  NoSymbolIcon
+  NoSymbolIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { Link, useLocation as useRouterLocation } from 'react-router-dom';
 
@@ -22,6 +23,7 @@ const Header = () => {
   const { connectionStatus, notifications, clearAllNotifications } = useWebSocket();
   const { locationPermission, currentLocation } = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useRouterLocation();
 
   const getConnectionIcon = () => {
@@ -34,7 +36,7 @@ const Header = () => {
       case 'error':
         return <NoSymbolIcon className="w-4 h-4 text-red-500" />;
       default:
-        return <NoSymbolIcon className="w-4 h-4 text-gray-400" />;
+        return <NoSymbolIcon className="w-4 h-4 text-neutral-400" />;
     }
   };
 
@@ -47,7 +49,7 @@ const Header = () => {
       case 'denied':
         return <NoSymbolIcon className="w-4 h-4 text-red-500" />;
       default:
-        return <MapPinIcon className="w-4 h-4 text-gray-400" />;
+        return <MapPinIcon className="w-4 h-4 text-neutral-400" />;
     }
   };
 
