@@ -19,6 +19,7 @@ import {
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
+import MapMarker from '../common/MapMarker';
 
 const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
 
@@ -491,10 +492,12 @@ const AdminDashboard = () => {
                                     <span className="text-sm font-medium capitalize">{alert.type}</span>
                                   </div>
                                 </td>
-                                <td className="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">
-                                  {typeof alert.location === 'object' 
-                                    ? (alert.location?.address || `${alert.location?.lat?.toFixed(4)}, ${alert.location?.lng?.toFixed(4)}`) 
-                                    : (alert.location || 'Unknown')}
+                                <td className="px-4 py-4">
+                                  <MapMarker 
+                                    location={alert.location} 
+                                    alertType={alert.type}
+                                    compact={true}
+                                  />
                                 </td>
                                 <td className="px-4 py-4">
                                   {getStatusBadge(alert.status)}
@@ -697,10 +700,12 @@ const AdminDashboard = () => {
                                     <span className="text-sm font-medium capitalize">{alert.type}</span>
                                   </div>
                                 </td>
-                                <td className="px-4 py-4 text-sm text-gray-900 max-w-xs truncate">
-                                  {typeof alert.location === 'object'
-                                    ? (alert.location?.address || `${alert.location?.lat?.toFixed(4)}, ${alert.location?.lng?.toFixed(4)}`)
-                                    : (alert.location || 'Unknown')}
+                                <td className="px-4 py-4">
+                                  <MapMarker 
+                                    location={alert.location} 
+                                    alertType={alert.type}
+                                    compact={true}
+                                  />
                                 </td>
                                 <td className="px-4 py-4">
                                   {getStatusBadge(alert.status)}
