@@ -10,6 +10,7 @@ import ResponderDashboard from './components/responder/ResponderDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Sidebar from './components/layout/Sidebar';
 import LoadingScreen from './components/common/LoadingScreen';
+import FloatingAlertButton from './components/alerts/FloatingAlertButton';
 
 // Import page components
 import EmergencyPage from './components/pages/EmergencyPage';
@@ -95,6 +96,7 @@ function AppContent() {
       />
       
       {isAuthenticated && <Sidebar />}
+      {isAuthenticated && (user?.role === 'volunteer' || user?.role === 'responder') && <FloatingAlertButton />}
       
       <motion.div
         initial={{ opacity: 0 }}

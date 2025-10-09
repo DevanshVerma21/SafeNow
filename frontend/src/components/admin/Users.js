@@ -221,68 +221,6 @@ const Users = () => {
   const handleRefresh = () => {
     fetchUsers(true);
   };
-          lastSeen: '2025-10-07T14:20:00Z',
-          emergencyContacts: 2
-        },
-        {
-          id: 5,
-          name: 'Fire Chief Suresh Reddy',
-          email: 'suresh@fire.gov.in',
-          phone: '+91-9876543214',
-          role: 'responder',
-          specialization: 'Fire',
-          location: 'Hyderabad, Telangana',
-          status: 'active',
-          joinDate: '2025-05-18',
-          lastSeen: '2025-10-09T09:30:00Z',
-          responseCount: 92
-        },
-        {
-          id: 6,
-          name: 'Admin User',
-          email: 'admin@safenow.com',
-          phone: '+91-9876543215',
-          role: 'admin',
-          location: 'Pune, Maharashtra',
-          status: 'active',
-          joinDate: '2025-01-15',
-          lastSeen: '2025-10-09T12:00:00Z',
-          adminLevel: 'Super Admin'
-        },
-        {
-          id: 7,
-          name: 'Meera Joshi',
-          email: 'meera@email.com',
-          phone: '+91-9876543216',
-          role: 'user',
-          location: 'Jaipur, Rajasthan',
-          status: 'active',
-          joinDate: '2025-09-20',
-          lastSeen: '2025-10-09T08:15:00Z',
-          emergencyContacts: 4
-        },
-        {
-          id: 8,
-          name: 'Dr. Amit Verma',
-          email: 'amit.verma@medical.com',
-          phone: '+91-9876543217',
-          role: 'responder',
-          specialization: 'Medical',
-          location: 'Kolkata, West Bengal',
-          status: 'active',
-          joinDate: '2025-07-30',
-          lastSeen: '2025-10-09T10:45:00Z',
-          responseCount: 56
-        }
-      ];
-      
-      setUsers(demoUsers);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filterUsers = () => {
     let filtered = users;

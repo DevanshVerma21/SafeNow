@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useLocation } from '../../context/LocationContext';
 import { Link, useLocation as useRouterLocation } from 'react-router-dom';
+import AlertPanel from '../alerts/AlertPanel';
 import { 
   HomeIcon, 
   ShieldCheckIcon, 
@@ -30,6 +31,7 @@ const Sidebar = () => {
   const { notifications, connectionStatus } = useWebSocket();
   const { locationPermission, currentLocation } = useLocation();
   const location = useRouterLocation();
+  const [isAlertPanelOpen, setIsAlertPanelOpen] = useState(false);
 
   const getMenuItems = () => {
     const baseItems = [
@@ -204,9 +206,30 @@ const Sidebar = () => {
             <h1 className="text-lg font-bold text-white drop-shadow-lg">SafeNow</h1>
             <p className="text-red-100 text-xs font-medium">Emergency Response</p>
           </div>
-          <div className="flex items-center space-x-2 text-xs text-white/90">
-            {getConnectionIcon()}
-            <MapPinIcon className={`w-3 h-3 ${locationPermission === 'granted' ? 'text-emerald-400' : 'text-amber-400'}`} />
+          <div className="flex items-center space-x-2">
+            {/* Alert Notification Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsAlertPanelOpen(true)}
+              className="relative w-9 h-9 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white/30 transition-all shadow-lg border border-white/30"
+            >
+              <BellIcon className="w-5 h-5 text-white" />
+              {notifications && notifications.length > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-red-700 text-xs font-bold rounded-full flex items-center justify-center border-2 border-white shadow-lg"
+                >
+                  {notifications.length}
+                </motion.span>
+              )}
+            </motion.button>
+            
+            <div className="flex items-center space-x-1 text-xs text-white/90">
+              {getConnectionIcon()}
+              <MapPinIcon className={`w-3 h-3 ${locationPermission === 'granted' ? 'text-emerald-400' : 'text-amber-400'}`} />
+            </div>
           </div>
         </div>
       </motion.div>
@@ -362,6 +385,12 @@ const Sidebar = () => {
           <p className="mt-2 text-gray-400">v2.0.1</p>
         </div>
       </motion.div>
+
+      {/* Alert Panel */}
+      <AlertPanel 
+        isOpen={isAlertPanelOpen} 
+        onClose={() => setIsAlertPanelOpen(false)} 
+      />
     </motion.div>
   );
 };
