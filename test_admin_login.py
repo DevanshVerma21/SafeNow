@@ -8,10 +8,10 @@ print("TESTING ADMIN LOGIN")
 print("=" * 60)
 
 # Test 1: Request OTP for admin
-print("\n1. Requesting OTP for admin (+1234567890)...")
+print("\n1. Requesting OTP for admin (+919876543210)...")
 try:
     response = requests.post(f"{API_BASE}/auth/request_otp", json={
-        "phone": "+1234567890",
+        "phone": "+919876543210",
         "purpose": "login"
     })
     print(f"   Status: {response.status_code}")
@@ -23,7 +23,7 @@ except Exception as e:
 print("\n2. Verifying OTP (123456) and checking role...")
 try:
     response = requests.post(f"{API_BASE}/auth/verify_otp", json={
-        "phone": "+1234567890",
+        "phone": "+919876543210",
         "code": "123456"
     })
     print(f"   Status: {response.status_code}")

@@ -5,7 +5,7 @@ The system has been configured with demo users for easy testing. All demo users 
 ## Login Credentials
 
 ### Admin Account
-- **Phone:** +1234567890
+- **Phone:** +919876543210
 - **Name:** Admin User
 - **Role:** Admin
 - **OTP:** 123456
@@ -13,32 +13,32 @@ The system has been configured with demo users for easy testing. All demo users 
 ### Volunteer Accounts
 
 #### Medical Volunteer
-- **Phone:** +1234567891
+- **Phone:** +919876543211
 - **Name:** John Doe
 - **Role:** Volunteer
 - **Specialization:** Medical
 - **OTP:** 123456
 
 #### Fire Department Volunteer
-- **Phone:** +1234567892
+- **Phone:** +919876543212
 - **Name:** Jane Smith
 - **Role:** Volunteer
 - **Specialization:** Fire
 - **OTP:** 123456
 
 #### Police Volunteer
-- **Phone:** +1234567893
+- **Phone:** +919876543213
 - **Name:** Mike Johnson
 - **Role:** Volunteer
 - **Specialization:** Police
 - **OTP:** 123456
 
 ### Citizen Accounts
-- **Phone:** +1234567894 | **Name:** Alice Brown | **OTP:** 123456
-- **Phone:** +1234567895 | **Name:** Bob Wilson | **OTP:** 123456
-- **Phone:** +1234567896 | **Name:** Carol Davis | **OTP:** 123456
-- **Phone:** +1234567897 | **Name:** David Miller | **OTP:** 123456
-- **Phone:** +1234567898 | **Name:** Emma Garcia | **OTP:** 123456
+- **Phone:** +919876543214 | **Name:** Alice Brown | **OTP:** 123456
+- **Phone:** +919876543215 | **Name:** Bob Wilson | **OTP:** 123456
+- **Phone:** +919876543216 | **Name:** Carol Davis | **OTP:** 123456
+- **Phone:** +919876543217 | **Name:** David Miller | **OTP:** 123456
+- **Phone:** +919876543218 | **Name:** Emma Garcia | **OTP:** 123456
 
 ## Features Implemented
 
@@ -63,22 +63,22 @@ The system has been configured with demo users for easy testing. All demo users 
 
 1. **Test Citizen Login:**
    - Go to http://localhost:3000
-   - Enter: +1234567894
+   - Enter: +919876543214
    - OTP: 123456
    - Should see: "Welcome Alice Brown! Logged in as citizen"
 
 2. **Test Volunteer Login:**
-   - Enter: +1234567891
+   - Enter: +919876543211
    - OTP: 123456
    - Should see: "Welcome John Doe! Logged in as volunteer"
 
 3. **Test Admin Login:**
-   - Enter: +1234567890
+   - Enter: +919876543210
    - OTP: 123456
    - Should see: "Welcome Admin User! Logged in as admin"
 
 4. **Test Data Persistence:**
-   - Login as a citizen (e.g., +1234567894)
+   - Login as a citizen (e.g., +919876543214)
    - Create an emergency alert
    - Stop the backend server (Ctrl+C)
    - Restart the backend server
@@ -114,7 +114,8 @@ SOS/
 ## Current Status
 ✅ Backend running: http://localhost:8000
 ✅ Frontend running: http://localhost:3000
-✅ Demo data loaded: 9 users (1 admin, 3 volunteers, 5 citizens)
+✅ Demo data loaded: 20 users (1 admin, 3 volunteers, 16 citizens)
 ✅ Persistent storage: Alerts saved to JSON
 ✅ Role-based auth: Role determined by backend
 ✅ UI updated: Role selection removed from login page
+✅ Localization: Indian phone numbers (+91) and emergency number (100)

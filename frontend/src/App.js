@@ -8,13 +8,26 @@ import ModernLoginPage from './components/auth/ModernLoginPage';
 import ModernDashboard from './components/dashboard/ModernDashboard';
 import ResponderDashboard from './components/responder/ResponderDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
-import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
 import LoadingScreen from './components/common/LoadingScreen';
+
+// Import page components
+import EmergencyPage from './components/pages/EmergencyPage';
+import EmergencyContactsPage from './components/pages/EmergencyContactsPage';
+import LiveMapPage from './components/pages/LiveMapPage';
+import AlertsPage from './components/pages/AlertsPage';
+
+// Import admin components
+import Analytics from './components/admin/Analytics';
+import Users from './components/admin/Users';
+import Reports from './components/admin/Reports';
+import AdminAlerts from './components/admin/AdminAlerts';
 
 // Import utilities
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WebSocketProvider } from './context/WebSocketContext';
 import { LocationProvider } from './context/LocationContext';
+import { SidebarProvider, useSidebar } from './context/SidebarContext';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole = null }) => {
@@ -42,6 +55,7 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
 
 function AppContent() {
   const { isAuthenticated, loading, user } = useAuth();
+  const { isCollapsed } = useSidebar();
   const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
@@ -83,13 +97,13 @@ function AppContent() {
         }}
       />
       
-      {isAuthenticated && <Header />}
+      {isAuthenticated && <Sidebar />}
       
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={isAuthenticated ? "pt-16" : ""}
+        className={isAuthenticated ? `transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-80'}` : ""}
       >
         <Routes>
           <Route 
@@ -107,6 +121,43 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <ModernDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* User-specific pages */}
+          <Route 
+            path="/emergency" 
+            element={
+              <ProtectedRoute>
+                <EmergencyPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/emergency-contacts" 
+            element={
+              <ProtectedRoute>
+                <EmergencyContactsPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/live-map" 
+            element={
+              <ProtectedRoute>
+                <LiveMapPage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          <Route 
+            path="/alerts" 
+            element={
+              <ProtectedRoute>
+                <AlertsPage />
               </ProtectedRoute>
             } 
           />
@@ -133,6 +184,43 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Admin specific routes */}
+          <Route 
+            path="/admin-dashboard/analytics" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Analytics />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/admin-dashboard/users" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Users />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/admin-dashboard/reports" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Reports />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/admin-dashboard/alerts" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminAlerts />
               </ProtectedRoute>
             } 
           />
@@ -164,7 +252,9 @@ function App() {
       <AuthProvider>
         <LocationProvider>
           <WebSocketProvider>
-            <AppContent />
+            <SidebarProvider>
+              <AppContent />
+            </SidebarProvider>
           </WebSocketProvider>
         </LocationProvider>
       </AuthProvider>

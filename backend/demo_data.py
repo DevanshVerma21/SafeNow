@@ -18,9 +18,9 @@ os.makedirs(STORAGE_DIR, exist_ok=True)
 # Demo Users with predefined roles
 DEMO_USERS = {
     # Admin
-    "+1234567890": {
+    "+919876543210": {
         "id": "admin-001",
-        "phone": "+1234567890",
+        "phone": "+919876543210",
         "name": "Admin User",
         "role": "admin",
         "email": "admin@safenow.com",
@@ -28,27 +28,27 @@ DEMO_USERS = {
     },
     
     # Volunteers (Responders)
-    "+1234567891": {
+    "+919876543211": {
         "id": "volunteer-001",
-        "phone": "+1234567891",
+        "phone": "+919876543211",
         "name": "John Doe",
         "role": "volunteer",
         "email": "john.doe@safenow.com",
         "is_verified": True,
         "specialization": "Medical"
     },
-    "+1234567892": {
+    "+919876543212": {
         "id": "volunteer-002",
-        "phone": "+1234567892",
+        "phone": "+919876543212",
         "name": "Jane Smith",
         "role": "volunteer",
         "email": "jane.smith@safenow.com",
         "is_verified": True,
         "specialization": "Fire & Rescue"
     },
-    "+1234567893": {
+    "+919876543213": {
         "id": "volunteer-003",
-        "phone": "+1234567893",
+        "phone": "+919876543213",
         "name": "Mike Johnson",
         "role": "volunteer",
         "email": "mike.johnson@safenow.com",
@@ -57,41 +57,41 @@ DEMO_USERS = {
     },
     
     # Regular Citizens
-    "+1234567894": {
+    "+919876543214": {
         "id": "citizen-001",
-        "phone": "+1234567894",
+        "phone": "+919876543214",
         "name": "Alice Brown",
         "role": "citizen",
         "email": "alice.brown@example.com",
         "is_verified": True
     },
-    "+1234567895": {
+    "+919876543215": {
         "id": "citizen-002",
-        "phone": "+1234567895",
+        "phone": "+919876543215",
         "name": "Bob Wilson",
         "role": "citizen",
         "email": "bob.wilson@example.com",
         "is_verified": True
     },
-    "+1234567896": {
+    "+919876543216": {
         "id": "citizen-003",
-        "phone": "+1234567896",
+        "phone": "+919876543216",
         "name": "Carol Davis",
         "role": "citizen",
         "email": "carol.davis@example.com",
         "is_verified": True
     },
-    "+1234567897": {
+    "+919876543217": {
         "id": "citizen-004",
-        "phone": "+1234567897",
+        "phone": "+919876543217",
         "name": "David Miller",
         "role": "citizen",
         "email": "david.miller@example.com",
         "is_verified": True
     },
-    "+1234567898": {
+    "+919876543218": {
         "id": "citizen-005",
-        "phone": "+1234567898",
+        "phone": "+919876543218",
         "name": "Emma Garcia",
         "role": "citizen",
         "email": "emma.garcia@example.com",
