@@ -6,6 +6,7 @@ import { useLocation } from '../../context/LocationContext';
 import ModernSOSButton from '../dashboard/ModernSOSButton';
 import QuickActions from '../dashboard/QuickActions';
 import LocationStatus from '../dashboard/LocationStatus';
+import MediaCapture from '../emergency/MediaCapture';
 import { 
   ExclamationTriangleIcon,
   PhoneIcon,
@@ -23,6 +24,7 @@ const EmergencyPage = () => {
   const { sendAlert } = useWebSocket();
   const { currentLocation, locationPermission } = useLocation();
   const [isSubmittingAlert, setIsSubmittingAlert] = useState(false);
+  const [capturedMedia, setCapturedMedia] = useState({ photos: [], audio: null, hasMedia: false });
 
   const emergencyTypes = [
     {
@@ -31,7 +33,9 @@ const EmergencyPage = () => {
       title: 'Medical Emergency',
       description: 'Heart attack, accident, severe injury',
       color: 'from-red-500 to-red-600',
-      urgency: 'critical'
+      urgency: 'critical',
+      emergencyNumber: '102', // Ambulance
+      serviceType: 'Ambulance Service'
     },
     {
       type: 'fire',
@@ -39,7 +43,9 @@ const EmergencyPage = () => {
       title: 'Fire Emergency',
       description: 'Building fire, forest fire, gas leak',
       color: 'from-orange-500 to-red-500',
-      urgency: 'critical'
+      urgency: 'critical',
+      emergencyNumber: '101', // Fire Department
+      serviceType: 'Fire Department'
     },
     {
       type: 'security',
@@ -47,7 +53,9 @@ const EmergencyPage = () => {
       title: 'Security Threat',
       description: 'Theft, assault, suspicious activity',
       color: 'from-blue-500 to-blue-600',
-      urgency: 'high'
+      urgency: 'high',
+      emergencyNumber: '100', // Police
+      serviceType: 'Police'
     },
     {
       type: 'general',
@@ -55,9 +63,15 @@ const EmergencyPage = () => {
       title: 'General Emergency',
       description: 'Other urgent situations requiring help',
       color: 'from-purple-500 to-purple-600',
-      urgency: 'medium'
+      urgency: 'medium',
+      emergencyNumber: '112', // Universal Emergency Number
+      serviceType: 'Emergency Services'
     }
   ];
+
+  const handleMediaCaptured = (mediaData) => {
+    setCapturedMedia(mediaData);
+  };
 
   const handleEmergencyAlert = async (emergencyType) => {
     if (!currentLocation) {
@@ -65,31 +79,118 @@ const EmergencyPage = () => {
       return;
     }
 
+    if (!user || !user.id) {
+      toast.error('Please login to send emergency alerts');
+      return;
+    }
+
     setIsSubmittingAlert(true);
     
     try {
+      // Create alert first
       const alertData = {
         type: emergencyType.type,
         title: emergencyType.title,
         description: `Emergency assistance needed: ${emergencyType.description}`,
         location: currentLocation,
         userId: user.id,
-        userName: user.name,
-        userPhone: user.phone,
+        userName: user.name || 'User',
+        userPhone: user.phone || 'N/A',
         timestamp: new Date().toISOString(),
         urgency: emergencyType.urgency,
-        status: 'active'
+        status: 'active',
+        photo_urls: [],
+        audio_url: null
       };
 
-      await sendAlert(alertData);
-      toast.success(`${emergencyType.title} alert sent successfully!`);
+      console.log('Sending alert with data:', alertData);
+
+      // Send alert via WebSocket
+      const response = await sendAlert(alertData);
+      console.log('Alert response:', response);
       
-      // Auto-call emergency services for critical emergencies
-      if (emergencyType.urgency === 'critical') {
+      const alertId = response?.alert_id || response?.alert?.id || Date.now(); // Fallback to timestamp if no ID returned
+
+      // Upload media if captured
+      if (capturedMedia.hasMedia) {
+        try {
+          const mediaUploadResponse = await fetch('http://localhost:8000/alerts/upload_media', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              alert_id: alertId,
+              photos: capturedMedia.photos,
+              audio: capturedMedia.audio
+            })
+          });
+
+          if (!mediaUploadResponse.ok) {
+            console.error('Media upload failed');
+            toast.error('Alert sent, but media upload failed');
+          } else {
+            const mediaResult = await mediaUploadResponse.json();
+            toast.success(`${emergencyType.title} alert sent with ${mediaResult.photos_saved} photo(s) and ${mediaResult.audio_saved ? 'audio' : 'no audio'}!`);
+          }
+        } catch (mediaError) {
+          console.error('Error uploading media:', mediaError);
+          toast.error('Alert sent, but media upload failed');
+        }
+      } else {
+        toast.success(`${emergencyType.title} alert sent successfully!`);
+      }
+      
+      // Auto-call appropriate emergency service based on type
+      const callEmergencyService = () => {
+        toast.success(
+          `📞 Connecting to ${emergencyType.serviceType} (${emergencyType.emergencyNumber})...`,
+          { 
+            duration: 3000,
+            icon: '🚨'
+          }
+        );
+        
+        // Attempt to initiate call
         setTimeout(() => {
-          toast.success('Connecting to emergency services (100)...');
-          window.location.href = 'tel:100';
-        }, 2000);
+          window.location.href = `tel:${emergencyType.emergencyNumber}`;
+        }, 1500);
+      };
+
+      // Different actions based on emergency type
+      switch (emergencyType.type) {
+        case 'medical':
+          // Critical - immediate ambulance call
+          toast.success('🚑 Dispatching ambulance to your location!', { duration: 4000 });
+          setTimeout(callEmergencyService, 2000);
+          break;
+          
+        case 'fire':
+          // Critical - immediate fire department call
+          toast.success('🚒 Fire department has been notified!', { duration: 4000 });
+          setTimeout(callEmergencyService, 2000);
+          break;
+          
+        case 'security':
+          // High priority - police notification
+          toast.success('🚓 Police have been alerted to your location!', { duration: 4000 });
+          setTimeout(callEmergencyService, 2500);
+          break;
+          
+        case 'general':
+          // Medium priority - prompt user for call
+          setTimeout(() => {
+            if (window.confirm('Would you like to call emergency services (112) now?')) {
+              callEmergencyService();
+            } else {
+              toast.success('Alert sent. You can call 112 anytime if needed.', { duration: 4000 });
+            }
+          }, 2000);
+          break;
+          
+        default:
+          // Fallback to general emergency number
+          setTimeout(callEmergencyService, 2000);
       }
       
     } catch (error) {
@@ -121,11 +222,21 @@ const EmergencyPage = () => {
           </p>
         </motion.div>
 
+        {/* Media Capture Section */}
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="max-w-4xl mx-auto"
+        >
+          <MediaCapture onMediaCaptured={handleMediaCaptured} maxPhotos={3} />
+        </motion.div>
+
         {/* SOS Button Section */}
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
           className="flex justify-center"
         >
           <ModernSOSButton />

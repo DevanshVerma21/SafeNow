@@ -483,7 +483,7 @@ const AdminDashboard = () => {
                     <div className="space-y-3">
                       {filterAlerts(activeAlerts).slice(0, 5).map((alert) => (
                         <div key={alert.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center space-x-3">
                               {getAlertTypeIcon(alert.type)}
                               <div>
@@ -515,6 +515,55 @@ const AdminDashboard = () => {
                               <span>Resolve</span>
                             </button>
                           </div>
+
+                          {/* Media Attachments Section */}
+                          {(alert.photo_urls?.length > 0 || alert.audio_url) && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <p className="text-xs font-semibold text-gray-700 mb-2">📎 Evidence Attached:</p>
+                              
+                              {/* Photo Gallery */}
+                              {alert.photo_urls?.length > 0 && (
+                                <div className="mb-2">
+                                  <div className="flex gap-2 flex-wrap">
+                                    {alert.photo_urls.map((photoUrl, index) => (
+                                      <a
+                                        key={index}
+                                        href={`http://localhost:8000${photoUrl}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group relative"
+                                        title="Click to view full size"
+                                      >
+                                        <img
+                                          src={`http://localhost:8000${photoUrl}`}
+                                          alt={`Evidence ${index + 1}`}
+                                          className="w-20 h-20 object-cover rounded-lg border-2 border-gray-300 group-hover:border-blue-500 transition-all shadow-sm"
+                                        />
+                                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
+                                          <span className="text-white text-xs font-semibold opacity-0 group-hover:opacity-100">View</span>
+                                        </div>
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Audio Player */}
+                              {alert.audio_url && (
+                                <div className="bg-gray-50 rounded-lg p-2">
+                                  <p className="text-xs text-gray-600 mb-1">🎤 Voice Message:</p>
+                                  <audio
+                                    controls
+                                    className="w-full h-8"
+                                    style={{ maxHeight: '32px' }}
+                                  >
+                                    <source src={`http://localhost:8000${alert.audio_url}`} type="audio/webm" />
+                                    Your browser does not support audio playback.
+                                  </audio>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

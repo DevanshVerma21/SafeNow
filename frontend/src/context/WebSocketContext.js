@@ -348,7 +348,17 @@ export const WebSocketProvider = ({ children }) => {
   const sendAlert = async (alertData) => {
     try {
       const headers = getAuthHeaders();
+      
+      // Check if we have authorization headers
+      if (!headers.Authorization) {
+        throw new Error('Not authenticated. Please login again.');
+      }
+      
+      console.log('Sending alert to backend...', { headers, alertData });
+      
       const response = await axios.post(`${API_BASE_URL}/alerts`, alertData, { headers });
+      
+      console.log('Alert response from backend:', response.data);
       
       if (response.data.success) {
         // Add to local state immediately for responsive UI
@@ -374,7 +384,17 @@ export const WebSocketProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error sending alert:', error);
-      throw error;
+      
+      // Provide specific error messages
+      if (error.response?.status === 401) {
+        throw new Error('Session expired. Please login again.');
+      } else if (error.response?.status === 422) {
+        throw new Error('Invalid alert data. Please check your location is enabled.');
+      } else if (error.message) {
+        throw error;
+      } else {
+        throw new Error('Network error. Please check your connection.');
+      }
     }
   };
 
