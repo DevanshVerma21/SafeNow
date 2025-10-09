@@ -15,13 +15,11 @@ import LoadingScreen from './components/common/LoadingScreen';
 import EmergencyPage from './components/pages/EmergencyPage';
 import EmergencyContactsPage from './components/pages/EmergencyContactsPage';
 import LiveMapPage from './components/pages/LiveMapPage';
-import AlertsPage from './components/pages/AlertsPage';
 
 // Import admin components
 import Analytics from './components/admin/Analytics';
 import Users from './components/admin/Users';
 import Reports from './components/admin/Reports';
-import AdminAlerts from './components/admin/AdminAlerts';
 
 // Import utilities
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -55,7 +53,6 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
 
 function AppContent() {
   const { isAuthenticated, loading, user } = useAuth();
-  const { isCollapsed } = useSidebar();
   const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
@@ -103,7 +100,7 @@ function AppContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className={isAuthenticated ? `transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-80'}` : ""}
+        className={isAuthenticated ? `transition-all duration-300 ml-80 min-h-screen bg-gray-50/50 p-6` : "min-h-screen"}
       >
         <Routes>
           <Route 
@@ -149,15 +146,6 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <LiveMapPage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/alerts" 
-            element={
-              <ProtectedRoute>
-                <AlertsPage />
               </ProtectedRoute>
             } 
           />
@@ -212,15 +200,6 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <Reports />
-              </ProtectedRoute>
-            } 
-          />
-
-          <Route 
-            path="/admin-dashboard/alerts" 
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminAlerts />
               </ProtectedRoute>
             } 
           />

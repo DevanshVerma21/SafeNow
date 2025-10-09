@@ -427,20 +427,20 @@ const Reports = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div>
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
         <h1 className="text-3xl font-bold text-gray-900">Reports & Analytics</h1>
         <p className="text-gray-600 mt-2">Generate comprehensive reports on system performance and activities</p>
       </div>
 
       {/* Report Selection & Filters */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Report Type Selection */}
           <div className="lg:col-span-2">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Select Report Type</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Select Report Type</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {reportTypes.map((report) => {
                 const IconComponent = report.icon;
                 return (
@@ -449,13 +449,13 @@ const Reports = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedReport(report.id)}
-                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                    className={`p-6 rounded-xl border-2 transition-all text-left ${
                       selectedReport === report.id
                         ? `border-${report.color}-500 bg-${report.color}-50`
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-center space-x-3 mb-2">
+                    <div className="flex items-center space-x-3 mb-3">
                       <IconComponent className={`w-6 h-6 ${
                         selectedReport === report.id ? `text-${report.color}-600` : 'text-gray-600'
                       }`} />
@@ -474,7 +474,7 @@ const Reports = () => {
 
           {/* Date Range Selection */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Date Range</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Date Range</h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>

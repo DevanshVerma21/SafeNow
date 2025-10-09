@@ -147,9 +147,9 @@ const Analytics = () => {
   );
 
   const AlertTypeChart = () => (
-    <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
       <h3 className="text-lg font-bold text-gray-900 mb-6">Alerts by Type</h3>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {analytics.alertsByType && Object.entries(analytics.alertsByType).map(([type, count], index) => {
           const colors = ['red', 'orange', 'blue', 'green', 'purple'];
           const color = colors[index % colors.length];
@@ -161,14 +161,14 @@ const Analytics = () => {
                 <div className={`w-4 h-4 bg-${color}-500 rounded-full`}></div>
                 <span className="font-medium text-gray-700">{type}</span>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 <div className="w-32 bg-gray-200 rounded-full h-2">
                   <div 
                     className={`bg-${color}-500 h-2 rounded-full transition-all duration-500`}
                     style={{ width: `${percentage}%` }}
                   ></div>
                 </div>
-                <span className="text-sm font-semibold text-gray-600 w-12">{count}</span>
+                <span className="text-sm font-semibold text-gray-600 w-12 text-right">{count}</span>
               </div>
             </div>
           );
@@ -191,9 +191,9 @@ const Analytics = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
           <p className="text-gray-600 mt-2">Real-time system performance and statistics</p>
@@ -252,57 +252,57 @@ const Analytics = () => {
         <motion.div
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200"
+          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-900">Active Alerts</h3>
             <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
           </div>
-          <div className="text-3xl font-bold text-red-600 mb-2">{analytics.activeAlerts || 0}</div>
+          <div className="text-4xl font-bold text-red-600 mb-3">{analytics.activeAlerts || 0}</div>
           <p className="text-sm text-gray-600">Requiring immediate attention</p>
         </motion.div>
 
         <motion.div
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200"
+          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-900">Resolved Alerts</h3>
             <CheckCircleIcon className="w-6 h-6 text-green-500" />
           </div>
-          <div className="text-3xl font-bold text-green-600 mb-2">{analytics.resolvedAlerts || 0}</div>
+          <div className="text-4xl font-bold text-green-600 mb-3">{analytics.resolvedAlerts || 0}</div>
           <p className="text-sm text-gray-600">Successfully handled</p>
         </motion.div>
 
         <motion.div
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200"
+          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-900">Active Responders</h3>
             <MapPinIcon className="w-6 h-6 text-blue-500" />
           </div>
-          <div className="text-3xl font-bold text-blue-600 mb-2">{analytics.responderCount || 0}</div>
+          <div className="text-4xl font-bold text-blue-600 mb-3">{analytics.responderCount || 0}</div>
           <p className="text-sm text-gray-600">Currently on duty</p>
         </motion.div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <AlertTypeChart />
         
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
           <h3 className="text-lg font-bold text-gray-900 mb-6">Daily Activity</h3>
           <div className="space-y-4">
             {analytics.dailyStats && Array.isArray(analytics.dailyStats) && analytics.dailyStats.length > 0 ? (
               analytics.dailyStats.map((day, index) => (
-                <div key={day.date || index} className="flex items-center justify-between">
+                <div key={day.date || index} className="flex items-center justify-between py-2">
                   <span className="text-sm font-medium text-gray-600">
                     {day.date ? new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Unknown Date'}
                   </span>
-                  <div className="flex space-x-4">
+                  <div className="flex space-x-6">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                       <span className="text-sm text-gray-600">{day.alerts || 0} alerts</span>
@@ -324,14 +324,14 @@ const Analytics = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-2xl p-6 border border-red-200">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-2xl p-8 border border-red-200">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => window.location.href = '/admin-dashboard/users'}
-            className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
+            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
           >
             Manage Users
           </motion.button>
@@ -339,7 +339,7 @@ const Analytics = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => window.location.href = '/admin-dashboard/alerts'}
-            className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
+            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
           >
             View All Alerts
           </motion.button>
@@ -347,7 +347,7 @@ const Analytics = () => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => window.location.href = '/admin-dashboard/reports'}
-            className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
+            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-4 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200"
           >
             Generate Report
           </motion.button>

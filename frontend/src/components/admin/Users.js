@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { useWebSocket } from '../../context/WebSocketContext';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import {
   UserGroupIcon,
   MagnifyingGlassIcon,
@@ -14,19 +17,33 @@ import {
   MapPinIcon,
   CheckCircleIcon,
   XCircleIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 
+const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
+
 const Users = () => {
-  const { user } = useAuth();
+  const { user, getAuthHeaders } = useAuth();
+  const { sendMessage, lastMessage } = useWebSocket();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'user',
+    specialization: '',
+    location: '',
+    status: 'active'
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -36,91 +53,232 @@ const Users = () => {
     filterUsers();
   }, [users, searchTerm, selectedRole]);
 
-  const fetchUsers = async () => {
+  // Handle real-time WebSocket messages
+  useEffect(() => {
+    if (lastMessage) {
+      try {
+        const message = JSON.parse(lastMessage.data);
+        handleRealtimeUpdate(message);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    }
+  }, [lastMessage]);
+
+  const handleRealtimeUpdate = (message) => {
+    switch (message.type) {
+      case 'user_created':
+        setUsers(prev => [message.data, ...prev]);
+        toast.success(`New user ${message.data.name} has been added`);
+        break;
+      case 'user_updated':
+        setUsers(prev => prev.map(u => 
+          u.id === message.data.id ? message.data : u
+        ));
+        toast.success(`User ${message.data.name} has been updated`);
+        break;
+      case 'user_deleted':
+        setUsers(prev => prev.filter(u => u.id !== message.data.id));
+        toast.success('User has been deleted');
+        break;
+      default:
+        break;
+    }
+  };
+
+  const fetchUsers = async (showToast = false) => {
     try {
-      setLoading(true);
-      const response = await fetch('/api/admin/users', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      if (showToast) setRefreshing(true);
       
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      } else {
-        // Fallback to demo data
-        const demoUsers = [
-          {
-            id: 1,
-            name: 'Rajesh Kumar',
-            email: 'rajesh@email.com',
-            phone: '+91-9876543210',
-            role: 'user',
-            location: 'Mumbai, Maharashtra',
-            status: 'active',
-            joinDate: '2025-09-15',
-            lastSeen: '2025-10-09T10:30:00Z',
-            emergencyContacts: 3
-          },
-          {
-            id: 2,
-            name: 'Dr. Priya Sharma',
-            email: 'priya.sharma@hospital.com',
-            phone: '+91-9876543211',
-            role: 'responder',
-            specialization: 'Medical',
-            location: 'Delhi NCR',
-            status: 'active',
-            joinDate: '2025-08-22',
-            lastSeen: '2025-10-09T11:15:00Z',
-            responseCount: 45
-          },
-          {
-            id: 3,
-            name: 'Inspector Vikram Singh',
-            email: 'vikram@police.gov.in',
-            phone: '+91-9876543212',
-            role: 'responder',
-            specialization: 'Police',
-            location: 'Bangalore, Karnataka',
-            status: 'on-duty',
-            joinDate: '2025-07-10',
-            lastSeen: '2025-10-09T11:45:00Z',
-            responseCount: 78
-          },
-          {
-            id: 4,
-            name: 'Arun Patel',
-            email: 'arun@email.com',
-            phone: '+91-9876543213',
-            role: 'user',
-            location: 'Chennai, Tamil Nadu',
-            status: 'inactive',
-            joinDate: '2025-06-05',
-            lastSeen: '2025-10-07T14:20:00Z',
-            emergencyContacts: 2
-          },
-          {
-            id: 5,
-            name: 'Fire Chief Suresh Reddy',
-            email: 'suresh@fire.gov.in',
-            phone: '+91-9876543214',
-            role: 'responder',
-            specialization: 'Fire',
-            location: 'Hyderabad, Telangana',
-            status: 'active',
-            joinDate: '2025-05-18',
-            lastSeen: '2025-10-09T09:30:00Z',
-            responseCount: 92
-          }
-        ];
-        setUsers(demoUsers);
+      const headers = getAuthHeaders();
+      const response = await axios.get(`${API_BASE}/admin/users`, { headers });
+      
+      if (response.data) {
+        setUsers(response.data);
+      }
+      
+      setLoading(false);
+      if (showToast) {
+        toast.success('Users refreshed');
+        setRefreshing(false);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
-      // Set demo data on error
-      setUsers([]);
+      
+      // Fallback to demo data if API fails
+      const demoUsers = [
+        {
+          id: 1,
+          name: 'Rajesh Kumar',
+          email: 'rajesh@email.com',
+          phone: '+91-9876543210',
+          role: 'user',
+          location: 'Mumbai, Maharashtra',
+          status: 'active',
+          created_at: '2025-09-15T10:00:00Z',
+          updated_at: '2025-10-09T10:30:00Z',
+          is_verified: true
+        },
+        {
+          id: 2,
+          name: 'Dr. Priya Sharma',
+          email: 'priya.sharma@hospital.com',
+          phone: '+91-9876543211',
+          role: 'responder',
+          specialization: 'Medical',
+          location: 'Delhi NCR',
+          status: 'active',
+          created_at: '2025-08-22T08:00:00Z',
+          updated_at: '2025-10-09T11:15:00Z',
+          is_verified: true
+        },
+        {
+          id: 3,
+          name: 'Inspector Vikram Singh',
+          email: 'vikram@police.gov.in',
+          phone: '+91-9876543212',
+          role: 'responder',
+          specialization: 'Police',
+          location: 'Bangalore, Karnataka',
+          status: 'on-duty',
+          created_at: '2025-07-10T09:00:00Z',
+          updated_at: '2025-10-09T11:45:00Z',
+          is_verified: true
+        },
+        {
+          id: 4,
+          name: 'Arun Patel',
+          email: 'arun@email.com',
+          phone: '+91-9876543213',
+          role: 'user',
+          location: 'Chennai, Tamil Nadu',
+          status: 'inactive',
+          created_at: '2025-06-05T14:00:00Z',
+          updated_at: '2025-09-20T16:00:00Z',
+          is_verified: true
+        },
+        {
+          id: 5,
+          name: 'Captain Meera Joshi',
+          email: 'meera@firestation.gov.in',
+          phone: '+91-9876543214',
+          role: 'responder',
+          specialization: 'Fire',
+          location: 'Pune, Maharashtra',
+          status: 'active',
+          created_at: '2025-05-18T11:00:00Z',
+          updated_at: '2025-10-09T12:00:00Z',
+          is_verified: true
+        },
+        {
+          id: 6,
+          name: 'Sunita Verma',
+          email: 'sunita@email.com',
+          phone: '+91-9876543215',
+          role: 'user',
+          location: 'Hyderabad, Telangana',
+          status: 'active',
+          created_at: '2025-04-12T13:00:00Z',
+          updated_at: '2025-10-08T15:30:00Z',
+          is_verified: true
+        },
+        {
+          id: 7,
+          name: 'Dr. Ramesh Gupta',
+          email: 'ramesh@emergency.com',
+          phone: '+91-9876543216',
+          role: 'responder',
+          specialization: 'Medical',
+          location: 'Kolkata, West Bengal',
+          status: 'off-duty',
+          created_at: '2025-03-25T10:00:00Z',
+          updated_at: '2025-10-07T18:00:00Z',
+          is_verified: true
+        },
+        {
+          id: 8,
+          name: 'Admin User',
+          email: 'admin@safenow.com',
+          phone: '+91-9876543217',
+          role: 'admin',
+          location: 'New Delhi',
+          status: 'active',
+          created_at: '2025-01-01T00:00:00Z',
+          updated_at: '2025-10-09T12:30:00Z',
+          is_verified: true
+        }
+      ];
+      
+      setUsers(demoUsers);
+      setLoading(false);
+      if (showToast) {
+        toast.error('Failed to fetch users from server, using demo data');
+        setRefreshing(false);
+      }
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchUsers(true);
+  };
+          lastSeen: '2025-10-07T14:20:00Z',
+          emergencyContacts: 2
+        },
+        {
+          id: 5,
+          name: 'Fire Chief Suresh Reddy',
+          email: 'suresh@fire.gov.in',
+          phone: '+91-9876543214',
+          role: 'responder',
+          specialization: 'Fire',
+          location: 'Hyderabad, Telangana',
+          status: 'active',
+          joinDate: '2025-05-18',
+          lastSeen: '2025-10-09T09:30:00Z',
+          responseCount: 92
+        },
+        {
+          id: 6,
+          name: 'Admin User',
+          email: 'admin@safenow.com',
+          phone: '+91-9876543215',
+          role: 'admin',
+          location: 'Pune, Maharashtra',
+          status: 'active',
+          joinDate: '2025-01-15',
+          lastSeen: '2025-10-09T12:00:00Z',
+          adminLevel: 'Super Admin'
+        },
+        {
+          id: 7,
+          name: 'Meera Joshi',
+          email: 'meera@email.com',
+          phone: '+91-9876543216',
+          role: 'user',
+          location: 'Jaipur, Rajasthan',
+          status: 'active',
+          joinDate: '2025-09-20',
+          lastSeen: '2025-10-09T08:15:00Z',
+          emergencyContacts: 4
+        },
+        {
+          id: 8,
+          name: 'Dr. Amit Verma',
+          email: 'amit.verma@medical.com',
+          phone: '+91-9876543217',
+          role: 'responder',
+          specialization: 'Medical',
+          location: 'Kolkata, West Bengal',
+          status: 'active',
+          joinDate: '2025-07-30',
+          lastSeen: '2025-10-09T10:45:00Z',
+          responseCount: 56
+        }
+      ];
+      
+      setUsers(demoUsers);
+    } catch (error) {
+      console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
@@ -184,6 +342,182 @@ const Users = () => {
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
+
+  const handleAddUser = () => {
+    if (!newUser.name || !newUser.email || !newUser.phone) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const userToAdd = {
+      id: Math.max(...users.map(u => u.id)) + 1,
+      ...newUser,
+      joinDate: new Date().toISOString().split('T')[0],
+      lastSeen: new Date().toISOString(),
+      emergencyContacts: newUser.role === 'user' ? 0 : undefined,
+      responseCount: newUser.role === 'responder' ? 0 : undefined,
+      adminLevel: newUser.role === 'admin' ? 'Admin' : undefined
+    };
+
+    setUsers([...users, userToAdd]);
+    setNewUser({
+      name: '',
+      email: '',
+      phone: '',
+      role: 'user',
+      specialization: '',
+      location: '',
+      status: 'active'
+    });
+    setShowAddModal(false);
+  };
+
+  const AddUserModal = () => (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        onClick={() => setShowAddModal(false)}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Add New User</h2>
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <XCircleIcon className="w-6 h-6 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Name *
+              </label>
+              <input
+                type="text"
+                value={newUser.name}
+                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Enter full name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email *
+              </label>
+              <input
+                type="email"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Enter email address"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone *
+              </label>
+              <input
+                type="tel"
+                value={newUser.phone}
+                onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="+91-XXXXXXXXXX"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Role *
+              </label>
+              <select
+                value={newUser.role}
+                onChange={(e) => setNewUser({ ...newUser, role: e.target.value, specialization: '' })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              >
+                <option value="user">Citizen</option>
+                <option value="responder">Responder</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+
+            {newUser.role === 'responder' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Specialization
+                </label>
+                <select
+                  value={newUser.specialization}
+                  onChange={(e) => setNewUser({ ...newUser, specialization: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  <option value="">Select specialization</option>
+                  <option value="Medical">Medical</option>
+                  <option value="Fire">Fire</option>
+                  <option value="Police">Police</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Location
+              </label>
+              <input
+                type="text"
+                value={newUser.location}
+                onChange={(e) => setNewUser({ ...newUser, location: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="City, State"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <select
+                value={newUser.status}
+                onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                {newUser.role === 'responder' && <option value="on-duty">On Duty</option>}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-4 mt-8">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="px-6 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddUser}
+              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+            >
+              Add User
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
 
   const UserModal = ({ user, onClose }) => (
     <AnimatePresence>
@@ -322,9 +656,9 @@ const Users = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600 mt-2">Manage all system users, responders, and administrators</p>
@@ -341,8 +675,8 @@ const Users = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+        <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1 relative">
             <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
@@ -371,7 +705,7 @@ const Users = () => {
 
       {/* Users List */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-8 border-b border-gray-200">
           <h3 className="text-lg font-bold text-gray-900">Users ({filteredUsers.length})</h3>
         </div>
         
@@ -466,6 +800,9 @@ const Users = () => {
           }} 
         />
       )}
+
+      {/* Add User Modal */}
+      {showAddModal && <AddUserModal />}
     </div>
   );
 };

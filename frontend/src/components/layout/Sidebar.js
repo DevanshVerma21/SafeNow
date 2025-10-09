@@ -63,12 +63,6 @@ const Sidebar = () => {
           label: 'Reports',
           path: '/admin-dashboard/reports',
           badge: null
-        },
-        {
-          icon: ExclamationTriangleIcon,
-          label: 'Alerts',
-          path: '/admin-dashboard/alerts',
-          badge: notifications?.length > 0 ? notifications.length : null
         }
       ];
     } else if (user?.role === 'volunteer' || user?.role === 'responder') {
@@ -116,12 +110,6 @@ const Sidebar = () => {
           label: 'Live Map',
           path: '/live-map',
           badge: null
-        },
-        {
-          icon: BellIcon,
-          label: 'Alerts',
-          path: '/alerts',
-          badge: notifications?.length > 0 ? notifications.length : null
         }
       ];
     }
