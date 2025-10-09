@@ -73,6 +73,7 @@
     "role": "citizen",
     "email": "emma.garcia@example.com",
     "is_verified": true
+<<<<<<< HEAD
   },
   "234567": {
     "id": "9b2c28a6-29af-4c05-9669-06de34a030b0",
@@ -122,5 +123,7 @@
     "name": "User",
     "role": "citizen",
     "is_verified": true
+=======
+>>>>>>> e50307768b5e36251ec3b6f5fb80990da3ad28a4
   }
 }

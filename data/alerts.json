@@ -89,6 +89,7 @@
     "resolved_at": "2025-10-09T06:59:11.664396",
     "marked_done_at": "2025-10-09T06:59:11.664396"
   },
+<<<<<<< HEAD
   "32af12c8-e3cb-4e54-b8a3-3c33bf9aad37": {
     "type": "medical",
     "note": "Emergency alert from mobile app - Medical Emergency",
@@ -140,54 +141,21 @@
     "created_at": null
   },
   "7aecb73d-cfe8-495a-aa37-cf7d34f60ff8": {
+=======
+  "1607a076-3c98-481e-9b27-bbe3f226f5da": {
+>>>>>>> e50307768b5e36251ec3b6f5fb80990da3ad28a4
     "type": "medical",
     "note": "Emergency alert from mobile app - Medical Emergency",
     "location": {
-      "lat": 28.5501005,
-      "lng": 77.3288417,
-      "accuracy": 1973.439741111239,
+      "lat": 28.545583350584142,
+      "lng": 77.33444381263783,
+      "accuracy": 61.0,
       "address": null
     },
     "attachments": [],
     "severity": 3,
-    "id": "7aecb73d-cfe8-495a-aa37-cf7d34f60ff8",
-    "user_id": "462083a8-c1cf-4185-ac85-ffdfc789b075",
-    "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T07:40:33.979219",
-    "marked_done_at": "2025-10-09T07:40:33.979219"
-  },
-  "889e9954-5f89-41fa-8a9f-3bfb0d5fa67c": {
-    "type": "medical",
-    "note": "Emergency alert from mobile app - Medical Emergency",
-    "location": {
-      "lat": 28.5501005,
-      "lng": 77.3288417,
-      "accuracy": 1973.439741111239,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "889e9954-5f89-41fa-8a9f-3bfb0d5fa67c",
+    "id": "1607a076-3c98-481e-9b27-bbe3f226f5da",
     "user_id": "admin-001",
-    "status": "resolved",
-    "created_at": null,
-    "resolved_at": "2025-10-09T07:49:21.347490",
-    "marked_done_at": "2025-10-09T07:49:21.347490"
-  },
-  "727a662c-0d89-4ac6-89cc-23ebb8bb23a4": {
-    "type": "safety",
-    "note": "Emergency alert from mobile app - Personal Safety",
-    "location": {
-      "lat": 28.5501005,
-      "lng": 77.3288417,
-      "accuracy": 1973.439741111239,
-      "address": null
-    },
-    "attachments": [],
-    "severity": 3,
-    "id": "727a662c-0d89-4ac6-89cc-23ebb8bb23a4",
-    "user_id": "011da83f-6ea1-4d44-9f06-3b7195f3442d",
     "status": "pending",
     "created_at": null
   }
