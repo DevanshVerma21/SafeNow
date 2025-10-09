@@ -17,17 +17,76 @@ const ModernLoginPage = () => {
   const [code, setCode] = useState('');
   const [role, setRole] = useState('citizen');
   const [loading, setLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+
+  // Phone number validation function
+  const validatePhoneNumber = (phoneNumber) => {
+    // Remove all spaces, dashes, parentheses, and plus signs
+    const cleaned = phoneNumber.replace(/[\s\-\(\)\+]/g, '');
+    
+    // Check if it contains only digits
+    if (!/^\d+$/.test(cleaned)) {
+      return { valid: false, message: 'Phone number should contain only digits' };
+    }
+    
+    // Check length (Indian numbers: 10 digits, International with country code: 10-15 digits)
+    if (cleaned.length < 10) {
+      return { valid: false, message: 'Phone number must be at least 10 digits' };
+    }
+    
+    if (cleaned.length > 15) {
+      return { valid: false, message: 'Phone number cannot exceed 15 digits' };
+    }
+    
+    // For Indian numbers (10 digits), check if it starts with valid digits (6-9)
+    if (cleaned.length === 10 && !/^[6-9]/.test(cleaned)) {
+      return { valid: false, message: 'Indian mobile numbers should start with 6, 7, 8, or 9' };
+    }
+    
+    return { valid: true, message: '' };
+  };
+
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    setPhone(value);
+    
+    // Clear error when user starts typing
+    if (phoneError) {
+      setPhoneError('');
+    }
+    
+    // Live validation feedback (only show if user has typed enough)
+    if (value.length >= 10) {
+      const validation = validatePhoneNumber(value);
+      if (!validation.valid) {
+        setPhoneError(validation.message);
+      }
+    }
+  };
 
   const handleRequestOTP = async (e) => {
     e.preventDefault();
-    if (!phone.trim()) return;
+    
+    if (!phone.trim()) {
+      setPhoneError('Please enter your phone number');
+      return;
+    }
+    
+    // Validate phone number
+    const validation = validatePhoneNumber(phone);
+    if (!validation.valid) {
+      setPhoneError(validation.message);
+      return;
+    }
     
     setLoading(true);
+    setPhoneError('');
     try {
       await requestOTP(phone, 'login');
       setStep(2);
     } catch (error) {
       console.error('OTP request failed:', error);
+      setPhoneError(error.response?.data?.detail || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
@@ -189,7 +248,9 @@ const ModernLoginPage = () => {
                 </label>
                 <div className="relative group">
                   <motion.div
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 group-focus-within:text-primary-500 transition-colors duration-200"
+                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-200 ${
+                      phoneError ? 'text-red-500' : 'text-neutral-400 group-focus-within:text-primary-500'
+                    }`}
                     whileHover={{ scale: 1.1 }}
                   >
                     <PhoneIcon className="w-5 h-5" />
@@ -198,25 +259,76 @@ const ModernLoginPage = () => {
                     type="tel"
                     required
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="modern-input w-full pl-12 pr-4 py-4"
-                    placeholder="+1 (555) 123-4567"
+                    onChange={handlePhoneChange}
+                    className={`modern-input w-full pl-12 pr-16 py-4 transition-all duration-200 ${
+                      phoneError 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                        : phone.length >= 10 && !phoneError
+                        ? 'border-green-500 focus:border-green-500 focus:ring-green-500/20'
+                        : ''
+                    }`}
+                    placeholder="Enter 10-digit mobile number (e.g., 9876543210)"
                     autoComplete="tel"
                     autoFocus
                   />
+                  {/* Valid checkmark */}
+                  {phone.length >= 10 && !phoneError && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                    >
+                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </motion.div>
+                  )}
+                  {phoneError && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute -bottom-6 left-0 text-sm text-red-600 font-medium flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {phoneError}
+                    </motion.p>
+                  )}
                 </div>
                 
-                <div className="mt-6">
+                <div className="mt-8">
                   <ModernButton
                     type="submit"
                     variant="primary"
                     size="lg"
-                    disabled={loading || !phone.trim()}
+                    disabled={loading || !phone.trim() || phoneError}
                     loading={loading}
                     className="w-full"
                   >
                     {loading ? 'Sending Code...' : 'Send Verification Code'}
                   </ModernButton>
+                </div>
+
+                {/* Helpful hints */}
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-blue-900 mb-1">Valid Phone Formats:</p>
+                      <ul className="text-xs text-blue-700 space-y-1">
+                        <li>• Indian: 9876543210 (10 digits starting with 6-9)</li>
+                        <li>• With country code: +919876543210</li>
+                        <li>• International: +1234567890 (with +)</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </GlassCard>
             </motion.form>

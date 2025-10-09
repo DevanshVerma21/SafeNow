@@ -49,8 +49,41 @@ CONNECTED_WEBSOCKETS: List[WebSocket] = []
 RESPONDERS = {}
 
 
+def validate_phone_number(phone: str) -> tuple[bool, str]:
+    """Validate phone number format"""
+    import re
+    
+    # Remove all non-digit characters except +
+    cleaned = re.sub(r'[^\d+]', '', phone)
+    
+    # Remove + sign for validation
+    digits_only = cleaned.replace('+', '')
+    
+    # Check if it contains only digits
+    if not digits_only.isdigit():
+        return False, "Phone number should contain only digits"
+    
+    # Check length (10-15 digits)
+    if len(digits_only) < 10:
+        return False, "Phone number must be at least 10 digits"
+    
+    if len(digits_only) > 15:
+        return False, "Phone number cannot exceed 15 digits"
+    
+    # For 10-digit numbers (Indian format), check if it starts with 6-9
+    if len(digits_only) == 10 and not re.match(r'^[6-9]', digits_only):
+        return False, "Indian mobile numbers should start with 6, 7, 8, or 9"
+    
+    return True, ""
+
+
 @app.post('/auth/request_otp')
 async def request_otp(req: OTPRequest):
+    # Validate phone number format
+    is_valid, error_message = validate_phone_number(req.phone)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_message)
+    
     # Check if this is a demo user
     if is_demo_user(req.phone):
         code = get_demo_otp()
