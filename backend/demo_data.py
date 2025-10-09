@@ -170,6 +170,144 @@ def get_user_role(phone: str) -> str:
     return user.get("role", "citizen") if user else "citizen"
 
 
+# Emergency Contacts Storage
+EMERGENCY_CONTACTS_FILE = os.path.join(STORAGE_DIR, 'emergency_contacts.json')
+
+# Default emergency contacts (system-wide)
+DEFAULT_EMERGENCY_CONTACTS = [
+    {
+        "id": "default-1",
+        "user_id": None,
+        "name": "Emergency Services (Police)",
+        "phone": "100",
+        "relationship": "emergency",
+        "priority": 1,
+        "is_default": True,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    },
+    {
+        "id": "default-2",
+        "user_id": None,
+        "name": "Ambulance / Medical Emergency",
+        "phone": "102",
+        "relationship": "medical",
+        "priority": 2,
+        "is_default": True,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    },
+    {
+        "id": "default-3",
+        "user_id": None,
+        "name": "Fire Department",
+        "phone": "101",
+        "relationship": "fire",
+        "priority": 3,
+        "is_default": True,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    },
+    {
+        "id": "default-4",
+        "user_id": None,
+        "name": "Women Helpline",
+        "phone": "1091",
+        "relationship": "helpline",
+        "priority": 4,
+        "is_default": True,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    },
+    {
+        "id": "default-5",
+        "user_id": None,
+        "name": "Child Helpline",
+        "phone": "1098",
+        "relationship": "helpline",
+        "priority": 5,
+        "is_default": True,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    },
+    {
+        "id": "default-6",
+        "user_id": None,
+        "name": "National Emergency Number",
+        "phone": "112",
+        "relationship": "emergency",
+        "priority": 6,
+        "is_default": True,
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    }
+]
+
+
+def load_emergency_contacts() -> List[Dict]:
+    """Load emergency contacts from file"""
+    if os.path.exists(EMERGENCY_CONTACTS_FILE):
+        try:
+            with open(EMERGENCY_CONTACTS_FILE, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading emergency contacts: {e}")
+    return []
+
+
+def save_emergency_contacts(contacts: List[Dict]) -> None:
+    """Save emergency contacts to file"""
+    try:
+        with open(EMERGENCY_CONTACTS_FILE, 'w') as f:
+            json.dump(contacts, f, indent=2, default=str)
+    except Exception as e:
+        print(f"Error saving emergency contacts: {e}")
+
+
+def get_user_emergency_contacts(user_id: str) -> List[Dict]:
+    """Get all emergency contacts for a user (defaults + user-specific)"""
+    user_contacts = load_emergency_contacts()
+    # Filter user-specific contacts
+    filtered_contacts = [c for c in user_contacts if c.get('user_id') == user_id]
+    # Combine with default contacts
+    return DEFAULT_EMERGENCY_CONTACTS + filtered_contacts
+
+
+def add_emergency_contact(user_id: str, contact: Dict) -> Dict:
+    """Add a new emergency contact for a user"""
+    contacts = load_emergency_contacts()
+    contact['user_id'] = user_id
+    contact['is_default'] = False
+    contact['created_at'] = datetime.now().isoformat()
+    contact['updated_at'] = datetime.now().isoformat()
+    contacts.append(contact)
+    save_emergency_contacts(contacts)
+    return contact
+
+
+def delete_emergency_contact(user_id: str, contact_id: str) -> bool:
+    """Delete an emergency contact"""
+    contacts = load_emergency_contacts()
+    # Find the contact
+    contact = next((c for c in contacts if c.get('id') == contact_id), None)
+    
+    if not contact:
+        return False
+    
+    # Check if it's a default contact
+    if contact.get('is_default'):
+        return False
+    
+    # Check ownership
+    if contact.get('user_id') != user_id:
+        return False
+    
+    # Remove the contact
+    contacts = [c for c in contacts if c.get('id') != contact_id]
+    save_emergency_contacts(contacts)
+    return True
+
+
 def initialize_demo_data():
     """Initialize demo users and load existing data"""
     print("=" * 60)

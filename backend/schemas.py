@@ -57,3 +57,10 @@ class AlertSummary(BaseModel):
     in_progress_count: int
     resolved_count: int
     total_count: int
+
+
+class EmergencyContactCreate(BaseModel):
+    name: str
+    phone: str
+    relationship: str = 'personal'
+    priority: int = 10

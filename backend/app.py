@@ -5,7 +5,7 @@ from typing import List
 from datetime import datetime, timedelta
 import uvicorn
 from backend.auth import create_access_token, verify_token, mock_send_otp, verify_otp_code
-from backend.schemas import UserCreate, OTPRequest, OTPVerify, AlertCreate, AlertOut, AlertStatusUpdate
+from backend.schemas import UserCreate, OTPRequest, OTPVerify, AlertCreate, AlertOut, AlertStatusUpdate, EmergencyContactCreate
 import uuid
 import asyncio
 from backend.db import database
@@ -22,7 +22,10 @@ from backend.demo_data import (
     is_demo_user,
     get_demo_otp,
     get_user_role,
-    DEMO_USERS
+    DEMO_USERS,
+    get_user_emergency_contacts,
+    add_emergency_contact,
+    delete_emergency_contact as delete_demo_emergency_contact
 )
 import json
 
@@ -521,6 +524,212 @@ async def get_active_responders(user=Depends(get_current_user)):
         print(f"⚠️ Database error: {e}")
         # Fallback to in-memory
         return [resp for resp in RESPONDERS.values() if resp.get('status') == 'active']
+
+
+########################################
+# EMERGENCY CONTACTS ENDPOINTS
+########################################
+
+@app.get('/emergency-contacts')
+async def get_emergency_contacts(user=Depends(get_current_user)):
+    """Get all emergency contacts (default + user-specific)."""
+    try:
+        user_id = user.get('id')
+        
+        # Try database first
+        if database.is_connected:
+            # Get default contacts (is_default=true, user_id is NULL)
+            default_query = """
+                SELECT id, name, phone, relationship, priority, is_default, created_at, updated_at
+                FROM emergency_contacts
+                WHERE is_default = true
+                ORDER BY priority ASC
+            """
+            default_contacts = await database.fetch_all(default_query)
+            
+            # Get user-specific contacts
+            user_query = """
+                SELECT id, name, phone, relationship, priority, is_default, created_at, updated_at
+                FROM emergency_contacts
+                WHERE user_id = :user_id AND is_default = false
+                ORDER BY priority ASC, created_at DESC
+            """
+            user_contacts = await database.fetch_all(user_query, values={"user_id": user_id})
+            
+            # Combine and format
+            all_contacts = []
+            
+            for contact in default_contacts:
+                all_contacts.append({
+                    "id": str(contact['id']),
+                    "name": contact['name'],
+                    "phone": contact['phone'],
+                    "relationship": contact['relationship'],
+                    "priority": contact['priority'],
+                    "is_default": True,
+                    "created_at": contact['created_at'].isoformat() if contact['created_at'] else None,
+                    "updated_at": contact['updated_at'].isoformat() if contact['updated_at'] else None
+                })
+            
+            for contact in user_contacts:
+                all_contacts.append({
+                    "id": str(contact['id']),
+                    "name": contact['name'],
+                    "phone": contact['phone'],
+                    "relationship": contact['relationship'],
+                    "priority": contact['priority'],
+                    "is_default": False,
+                    "created_at": contact['created_at'].isoformat() if contact['created_at'] else None,
+                    "updated_at": contact['updated_at'].isoformat() if contact['updated_at'] else None
+                })
+            
+            print(f"✅ Retrieved {len(all_contacts)} emergency contacts from DB for user {user_id}")
+            return all_contacts
+        else:
+            # Use demo data
+            contacts = get_user_emergency_contacts(user_id)
+            print(f"✅ Retrieved {len(contacts)} emergency contacts from demo data for user {user_id}")
+            return contacts
+        
+    except Exception as e:
+        print(f"⚠️ Error fetching emergency contacts: {e}")
+        # Fallback to demo data
+        try:
+            contacts = get_user_emergency_contacts(user_id)
+            return contacts
+        except:
+            # Last resort fallback
+            return [
+                {"id": "default-1", "name": "Emergency Services (Police)", "phone": "100", "relationship": "emergency", "priority": 1, "is_default": True},
+                {"id": "default-2", "name": "Ambulance / Medical Emergency", "phone": "102", "relationship": "medical", "priority": 2, "is_default": True},
+                {"id": "default-3", "name": "Fire Department", "phone": "101", "relationship": "fire", "priority": 3, "is_default": True},
+                {"id": "default-4", "name": "Women Helpline", "phone": "1091", "relationship": "helpline", "priority": 4, "is_default": True}
+            ]
+
+
+@app.post('/emergency-contacts')
+async def create_emergency_contact(
+    contact: EmergencyContactCreate,
+    user=Depends(get_current_user)
+):
+    """Add a new emergency contact for the current user."""
+    try:
+        user_id = user.get('id')
+        
+        # Validate inputs
+        if not contact.name or not contact.name.strip():
+            raise HTTPException(status_code=400, detail="Contact name is required")
+        if not contact.phone or not contact.phone.strip():
+            raise HTTPException(status_code=400, detail="Phone number is required")
+        
+        contact_id = str(uuid.uuid4())
+        
+        # Try database first
+        if database.is_connected:
+            insert_query = """
+                INSERT INTO emergency_contacts (id, user_id, name, phone, relationship, priority, is_default, created_at, updated_at)
+                VALUES (:id, :user_id, :name, :phone, :relationship, :priority, false, now(), now())
+                RETURNING id, name, phone, relationship, priority, is_default, created_at, updated_at
+            """
+            
+            result = await database.fetch_one(
+                insert_query,
+                values={
+                    "id": contact_id,
+                    "user_id": user_id,
+                    "name": contact.name.strip(),
+                    "phone": contact.phone.strip(),
+                    "relationship": contact.relationship,
+                    "priority": contact.priority
+                }
+            )
+            
+            new_contact = {
+                "id": str(result['id']),
+                "name": result['name'],
+                "phone": result['phone'],
+                "relationship": result['relationship'],
+                "priority": result['priority'],
+                "is_default": False,
+                "created_at": result['created_at'].isoformat() if result['created_at'] else None,
+                "updated_at": result['updated_at'].isoformat() if result['updated_at'] else None
+            }
+            
+            print(f"✅ Created emergency contact {contact_id} in DB for user {user_id}: {contact.name}")
+            return new_contact
+        else:
+            # Use demo data
+            new_contact = add_emergency_contact(
+                user_id=user_id,
+                contact={
+                    "id": contact_id,
+                    "name": contact.name.strip(),
+                    "phone": contact.phone.strip(),
+                    "relationship": contact.relationship,
+                    "priority": contact.priority
+                }
+            )
+            
+            print(f"✅ Created emergency contact {contact_id} in demo data for user {user_id}: {contact.name}")
+            return new_contact
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"⚠️ Error creating emergency contact: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to create emergency contact: {str(e)}")
+
+
+@app.delete('/emergency-contacts/{contact_id}')
+async def delete_emergency_contact(contact_id: str, user=Depends(get_current_user)):
+    """Delete a user's emergency contact (cannot delete default contacts)."""
+    try:
+        user_id = user.get('id')
+        
+        # Try database first
+        if database.is_connected:
+            # Check if contact exists and belongs to user
+            check_query = """
+                SELECT id, is_default, user_id
+                FROM emergency_contacts
+                WHERE id = :contact_id
+            """
+            contact = await database.fetch_one(check_query, values={"contact_id": contact_id})
+            
+            if not contact:
+                raise HTTPException(status_code=404, detail="Contact not found")
+            
+            # Prevent deletion of default contacts
+            if contact['is_default']:
+                raise HTTPException(status_code=403, detail="Cannot delete default emergency contacts")
+            
+            # Verify ownership
+            if str(contact['user_id']) != str(user_id):
+                raise HTTPException(status_code=403, detail="Access denied: You can only delete your own contacts")
+            
+            # Delete the contact
+            delete_query = "DELETE FROM emergency_contacts WHERE id = :contact_id"
+            await database.execute(delete_query, values={"contact_id": contact_id})
+            
+            print(f"✅ Deleted emergency contact {contact_id} from DB for user {user_id}")
+            return {"status": "success", "message": "Contact deleted successfully"}
+        else:
+            # Use demo data
+            success = delete_demo_emergency_contact(user_id, contact_id)
+            
+            if not success:
+                raise HTTPException(status_code=403, detail="Cannot delete this contact")
+            
+            print(f"✅ Deleted emergency contact {contact_id} from demo data for user {user_id}")
+            return {"status": "success", "message": "Contact deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"⚠️ Error deleting emergency contact: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete emergency contact")
 
 
 @app.put('/alerts/{alert_id}/mark-done')

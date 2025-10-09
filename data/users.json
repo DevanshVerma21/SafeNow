@@ -162,5 +162,12 @@
     "role": "citizen",
     "email": "emma.garcia@example.com",
     "is_verified": true
+  },
+  "123456789": {
+    "id": "f282a89a-3281-446f-a743-36bc86c061af",
+    "phone": "123456789",
+    "name": "User",
+    "role": "citizen",
+    "is_verified": true
   }
 }
