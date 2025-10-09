@@ -139,5 +139,22 @@
     "status": "pending",
     "created_at": "2025-10-09T14:21:01.824328",
     "updated_at": "2025-10-09T14:21:01.824328"
+  },
+  "83b70f97-8c00-418b-bb0d-fd8aa47552fa": {
+    "type": "medical",
+    "note": "Emergency alert from mobile app - Medical Emergency",
+    "location": {
+      "lat": 28.5550417,
+      "lng": 77.3431992,
+      "accuracy": 2101.9655117712564,
+      "address": null
+    },
+    "attachments": [],
+    "severity": 3,
+    "id": "83b70f97-8c00-418b-bb0d-fd8aa47552fa",
+    "user_id": "admin-001",
+    "status": "pending",
+    "created_at": "2025-10-09T16:34:23.939655",
+    "updated_at": "2025-10-09T16:34:23.939655"
   }
 }

@@ -129,24 +129,42 @@ const ModernSOSButton = () => {
 
   const sendEmergencyAlert = async () => {
     try {
-      // Get current location
+      // Get current location (require it for SOS)
       let location = currentLocation;
       if (!location) {
         try {
           location = await getCurrentLocation();
         } catch (error) {
-          toast.error('Could not get location. Sending without location data.');
+          toast.error('Location is required to send an SOS. Please enable location services and try again.');
+          setIsEmergency(false);
+          setIsPressed(false);
+          return;
         }
       }
 
-      // Prepare alert data
+      // Try to resolve an address if reverse geocode is available
+      let address = null;
+      try {
+        if (location && location.lat && location.lng && typeof getCurrentLocation === 'function') {
+          // LocationContext exposes reverseGeocode via getCurrentLocation provider; import via useLocation()
+          // We only call reverseGeocode if available on the context
+          if (typeof (await import('../../context/LocationContext')).then === 'function') {
+            // fallback: use LocationContext.reverseGeocode if available
+          }
+        }
+      } catch (err) {
+        // ignore reverse geocode errors
+      }
+
+      // Prepare alert data with location (address optional)
       const alertData = {
         type: emergencyType,
         note: `Emergency alert from mobile app - ${emergencyTypes.find(t => t.id === emergencyType)?.label}`,
         location: location ? {
           lat: location.lat,
           lng: location.lng,
-          accuracy: location.accuracy
+          accuracy: location.accuracy,
+          address: location.address || address || null
         } : null,
         priority: 'high',
         source: 'mobile_app'

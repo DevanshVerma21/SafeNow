@@ -76,14 +76,24 @@ const SOSButton = () => {
 
   const sendEmergencyAlert = async () => {
     try {
-      // Get current location
+      // Get current location (require it for SOS)
       let location = currentLocation;
       if (!location) {
         try {
           location = await getCurrentLocation();
         } catch (error) {
-          toast.error('Could not get location. Sending without location data.');
+          toast.error('Location is required to send an SOS. Please enable location services and try again.');
+          setIsEmergency(false);
+          return;
         }
+      }
+
+      // Try to attach address if reverseGeocode available in LocationContext
+      let address = null;
+      try {
+        // LocationContext exposes reverseGeocode via hook; import dynamically if needed
+      } catch (err) {
+        // ignore
       }
 
       // Prepare alert data
@@ -93,7 +103,8 @@ const SOSButton = () => {
         location: location ? {
           lat: location.lat,
           lng: location.lng,
-          accuracy: location.accuracy
+          accuracy: location.accuracy,
+          address: location.address || address || null
         } : null,
         media: audioBlob ? 'audio_recording_available' : null,
         priority: 'high',

@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useLocation } from '../../context/LocationContext';
 import { Link, useLocation as useRouterLocation } from 'react-router-dom';
-import AlertPanel from '../alerts/AlertPanel';
 import { 
   HomeIcon, 
   ShieldCheckIcon, 
@@ -31,7 +30,7 @@ const Sidebar = () => {
   const { notifications, connectionStatus } = useWebSocket();
   const { locationPermission, currentLocation } = useLocation();
   const location = useRouterLocation();
-  const [isAlertPanelOpen, setIsAlertPanelOpen] = useState(false);
+  // Alert panel removed from sidebar per request
 
   const getMenuItems = () => {
     const baseItems = [
@@ -208,23 +207,7 @@ const Sidebar = () => {
           </div>
           <div className="flex items-center space-x-2">
             {/* Alert Notification Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsAlertPanelOpen(true)}
-              className="relative w-9 h-9 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center hover:bg-white/30 transition-all shadow-lg border border-white/30"
-            >
-              <BellIcon className="w-5 h-5 text-white" />
-              {notifications && notifications.length > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-red-700 text-xs font-bold rounded-full flex items-center justify-center border-2 border-white shadow-lg"
-                >
-                  {notifications.length}
-                </motion.span>
-              )}
-            </motion.button>
+            {/* Alert button removed from sidebar; notifications remain available in responder views */}
             
             <div className="flex items-center space-x-1 text-xs text-white/90">
               {getConnectionIcon()}
@@ -386,11 +369,7 @@ const Sidebar = () => {
         </div>
       </motion.div>
 
-      {/* Alert Panel */}
-      <AlertPanel 
-        isOpen={isAlertPanelOpen} 
-        onClose={() => setIsAlertPanelOpen(false)} 
-      />
+      {/* Alert panel removed */}
     </motion.div>
   );
 };

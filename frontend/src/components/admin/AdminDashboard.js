@@ -183,6 +183,15 @@ const AdminDashboard = () => {
     });
   };
 
+  const formatLocation = (location) => {
+    if (!location) return 'Location unknown';
+    // location might be an object { lat, lng, address } or a string
+    if (typeof location === 'string') return location;
+    if (location.address) return location.address;
+    if (location.lat && location.lng) return `${location.lat.toFixed ? location.lat.toFixed(5) : location.lat}, ${location.lng.toFixed ? location.lng.toFixed(5) : location.lng}`;
+    return 'Location unavailable';
+  };
+
   // Calculate time since resolved (e.g., "10 mins ago", "2 hours ago")
   const getTimeSinceResolved = (resolvedAt) => {
     if (!resolvedAt) return '';
@@ -480,6 +489,22 @@ const AdminDashboard = () => {
                               <div>
                                 <p className="font-medium text-gray-900">{alert.user_name || 'Unknown'}</p>
                                 <p className="text-sm text-gray-500 capitalize">{alert.type}</p>
+                                {/* Location display added */}
+                                <div className="flex items-center space-x-2 mt-1">
+                                  <MapPinIcon className="w-4 h-4 text-gray-400" />
+                                  <p className="text-xs text-gray-400 truncate">{formatLocation(alert.location)}</p>
+                                  {/* Open in maps link when lat/lng available */}
+                                  {alert.location && alert.location.lat && alert.location.lng && (
+                                    <a
+                                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${alert.location.lat},${alert.location.lng}`)}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-xs text-blue-600 hover:underline ml-2"
+                                    >
+                                      Open in maps
+                                    </a>
+                                  )}
+                                </div>
                               </div>
                             </div>
                             <button
