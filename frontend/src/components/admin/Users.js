@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import HamburgerMenu from '../layout/HamburgerMenu';
 import {
   UserGroupIcon,
   MagnifyingGlassIcon,
@@ -594,18 +595,21 @@ const Users = () => {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-2">Manage all system users, responders, and administrators</p>
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-200 gap-4">
+        <div className="flex items-center gap-3">
+          <HamburgerMenu />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">Manage all system users, responders, and administrators</p>
+          </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowAddModal(true)}
-          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-medium transition-colors flex items-center space-x-2 shadow-lg"
+          className="w-full lg:w-auto bg-red-500 hover:bg-red-600 active:bg-red-700 text-white px-4 md:px-6 py-3 min-h-[48px] touch-manipulation rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm md:text-base"
         >
           <PlusIcon className="w-5 h-5" />
           <span>Add User</span>
@@ -613,8 +617,8 @@ const Users = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-        <div className="flex flex-col md:flex-row gap-6">
+      <div className="bg-white rounded-2xl p-4 md:p-6 lg:p-8 shadow-lg border border-gray-200">
+        <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
           <div className="flex-1 relative">
             <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
@@ -622,15 +626,18 @@ const Users = () => {
               placeholder="Search users by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm md:text-base"
             />
           </div>
-          <div className="flex items-center space-x-2">
-            <FunnelIcon className="w-5 h-5 text-gray-400" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="flex items-center space-x-2">
+              <FunnelIcon className="w-5 h-5 text-gray-400" />
+              <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Filter by:</span>
+            </div>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full sm:w-auto px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
             >
               <option value="all">All Roles</option>
               <option value="user">Citizens</option>
@@ -643,19 +650,29 @@ const Users = () => {
 
       {/* Users List */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-8 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900">Users ({filteredUsers.length})</h3>
+        <div className="p-4 md:p-6 lg:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+          <h3 className="text-base md:text-lg font-bold text-gray-900">Users ({filteredUsers.length})</h3>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={fetchUsers}
+            disabled={refreshing}
+            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 min-h-[44px] touch-manipulation bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50 text-sm md:text-base"
+          >
+            <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
+          </motion.button>
         </div>
         
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Seen</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                <th className="px-3 md:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">User</th>
+                <th className="px-3 md:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                <th className="px-3 md:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                <th className="px-3 md:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Seen</th>
+                <th className="px-3 md:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -667,57 +684,57 @@ const Users = () => {
                   transition={{ delay: index * 0.1 }}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 bg-gradient-to-br from-${getRoleColor(user.role)}-500 to-${getRoleColor(user.role)}-600 rounded-xl flex items-center justify-center`}>
-                        <UserIcon className="w-5 h-5 text-white" />
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <div className={`w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-${getRoleColor(user.role)}-500 to-${getRoleColor(user.role)}-600 rounded-xl flex items-center justify-center`}>
+                        <UserIcon className="w-4 h-4 md:w-5 md:h-5 text-white" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-900">{user.name}</p>
-                        <p className="text-sm text-gray-600">{user.email}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-900 text-sm md:text-base truncate">{user.name}</p>
+                        <p className="text-xs md:text-sm text-gray-600 truncate">{user.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full bg-${getRoleColor(user.role)}-100 text-${getRoleColor(user.role)}-800`}>
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-block px-2 md:px-3 py-1 text-xs font-semibold rounded-full bg-${getRoleColor(user.role)}-100 text-${getRoleColor(user.role)}-800`}>
                       {user.role} {user.specialization && `- ${user.specialization}`}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
                       <div className={`w-2 h-2 bg-${getStatusColor(user.status)}-500 rounded-full`}></div>
-                      <span className="text-sm font-medium text-gray-900 capitalize">{user.status}</span>
+                      <span className="text-xs md:text-sm font-medium text-gray-900 capitalize">{user.status}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className="text-sm text-gray-600">{formatLastSeen(user.lastSeen)}</span>
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                    <span className="text-xs md:text-sm text-gray-600">{formatLastSeen(user.lastSeen)}</span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex space-x-2">
+                  <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                    <div className="flex space-x-1 md:space-x-2">
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => {
                           setSelectedUser(user);
                           setShowUserModal(true);
                         }}
-                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
+                        className="p-1.5 md:p-2 min-h-[36px] min-w-[36px] md:min-h-[40px] md:min-w-[40px] touch-manipulation bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-600 rounded-lg transition-colors"
                       >
-                        <EyeIcon className="w-4 h-4" />
+                        <EyeIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </motion.button>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="p-2 bg-green-100 hover:bg-green-200 text-green-600 rounded-lg transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-1.5 md:p-2 min-h-[36px] min-w-[36px] md:min-h-[40px] md:min-w-[40px] touch-manipulation bg-green-100 hover:bg-green-200 active:bg-green-300 text-green-600 rounded-lg transition-colors"
                       >
-                        <PencilIcon className="w-4 h-4" />
+                        <PencilIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </motion.button>
                       <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-1.5 md:p-2 min-h-[36px] min-w-[36px] md:min-h-[40px] md:min-w-[40px] touch-manipulation bg-red-100 hover:bg-red-200 active:bg-red-300 text-red-600 rounded-lg transition-colors"
                       >
-                        <TrashIcon className="w-4 h-4" />
+                        <TrashIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </motion.button>
                     </div>
                   </td>

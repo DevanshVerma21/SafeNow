@@ -207,7 +207,7 @@ const ModernSOSButton = () => {
       {/* Main SOS Button */}
       <motion.div className="flex flex-col items-center">
         <motion.button
-          className={`relative w-32 h-32 rounded-full font-bold text-2xl text-white border-4 border-white/90 ${
+          className={`relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full font-bold text-lg sm:text-xl md:text-2xl text-white border-2 md:border-4 border-white/90 touch-manipulation ${
             isEmergency 
               ? 'sos-button sos-pulse bg-gradient-to-br from-red-500 via-red-600 to-red-700' 
               : 'sos-button bg-gradient-to-br from-red-500 via-red-600 to-red-700'
@@ -247,7 +247,7 @@ const ModernSOSButton = () => {
               exit={{ opacity: 0 }}
             >
               <motion.span
-                className="text-6xl font-bold text-white"
+                className="text-3xl sm:text-4xl md:text-6xl font-bold text-white"
                 animate={{ scale: [1.2, 1] }}
                 transition={{ duration: 0.5 }}
                 key={countdown}
@@ -260,7 +260,7 @@ const ModernSOSButton = () => {
 
         {/* Status text */}
         <motion.p 
-          className="mt-4 text-center text-neutral-600 font-medium"
+          className="mt-2 sm:mt-4 text-center text-neutral-600 font-medium text-sm sm:text-base px-2"
           animate={{ opacity: isEmergency ? [1, 0.5, 1] : 1 }}
           transition={{ duration: 1, repeat: isEmergency ? Infinity : 0 }}
         >
@@ -275,31 +275,31 @@ const ModernSOSButton = () => {
       <AnimatePresence>
         {showOptions && (
           <motion.div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowOptions(false)}
           >
             <motion.div
-              className="w-full max-w-md"
+              className="w-full max-w-sm sm:max-w-md mx-2"
               initial={{ scale: 0.8, y: 50 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.8, y: 50 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <GlassCard className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold gradient-text">Select Emergency Type</h3>
+              <GlassCard className="p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h3 className="text-lg sm:text-xl font-bold gradient-text">Select Emergency Type</h3>
                   <button
                     onClick={() => setShowOptions(false)}
-                    className="p-2 rounded-full hover:bg-neutral-100 transition-colors"
+                    className="p-1 sm:p-2 rounded-full hover:bg-neutral-100 transition-colors touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
                   >
                     <XMarkIcon className="w-5 h-5 text-neutral-500" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 gap-2 sm:gap-3">
                   {emergencyTypes.map((type, index) => (
                     <motion.button
                       key={type.id}
@@ -307,22 +307,22 @@ const ModernSOSButton = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
                       onClick={() => startEmergency(type.id)}
-                      className={`group relative overflow-hidden p-4 rounded-2xl bg-gradient-to-r ${type.color} text-white text-left transition-all duration-300 hover:scale-105 hover:shadow-lg`}
+                      className={`group relative overflow-hidden p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-r ${type.color} text-white text-left transition-all duration-300 hover:scale-105 hover:shadow-lg touch-manipulation min-h-[60px]`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="text-2xl">{type.icon}</div>
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="text-xl sm:text-2xl">{type.icon}</div>
                         <div className="flex-1">
-                          <div className="font-semibold text-lg">{type.label}</div>
-                          <div className="text-sm opacity-90">{type.description}</div>
+                          <div className="font-semibold text-base sm:text-lg">{type.label}</div>
+                          <div className="text-xs sm:text-sm opacity-90 line-clamp-2">{type.description}</div>
                         </div>
-                        <ExclamationTriangleIcon className="w-6 h-6 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        <ExclamationTriangleIcon className="w-5 h-5 sm:w-6 sm:h-6 opacity-60 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </motion.button>
                   ))}
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-white/20">
-                  <p className="text-sm text-neutral-600 text-center">
+                <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/20">
+                  <p className="text-xs sm:text-sm text-neutral-600 text-center px-2">
                     Select the type that best describes your emergency. 
                     <br />
                     <span className="font-semibold">Emergency services will be notified immediately.</span>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useLocation } from '../../context/LocationContext';
+import HamburgerMenu from '../layout/HamburgerMenu';
 import ModernSOSButton from '../dashboard/ModernSOSButton';
 import QuickActions from '../dashboard/QuickActions';
 import LocationStatus from '../dashboard/LocationStatus';
@@ -205,8 +206,8 @@ const EmergencyPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
         <motion.div
           initial={{ y: -50, opacity: 0 }}
@@ -214,13 +215,18 @@ const EmergencyPage = () => {
           transition={{ duration: 0.6 }}
           className="text-center space-y-4"
         >
-          <div className="flex items-center justify-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <ExclamationTriangleIcon className="w-6 h-6 text-white" />
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 mb-4">
+            <div className="flex items-center justify-start w-full sm:w-auto">
+              <HamburgerMenu />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800">Emergency Center</h1>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <ExclamationTriangleIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+              </div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800">Emergency Center</h1>
+            </div>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Quick access to emergency services and immediate assistance
           </p>
         </motion.div>
@@ -250,18 +256,18 @@ const EmergencyPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="flex justify-center"
+          className="flex justify-center px-4"
         >
           <motion.a
             href="tel:100"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center space-x-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl hover:shadow-red-500/25 transition-all duration-300"
+            className="flex items-center space-x-3 md:space-x-4 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl shadow-2xl hover:shadow-red-500/25 transition-all duration-300 w-full max-w-md touch-manipulation"
           >
-            <PhoneIcon className="w-8 h-8" />
+            <PhoneIcon className="w-6 h-6 md:w-8 md:h-8" />
             <div className="text-left">
-              <div className="text-xl font-bold">Emergency Call</div>
-              <div className="text-red-100">Dial 100 - Emergency Services</div>
+              <div className="text-lg md:text-xl font-bold">Emergency Call</div>
+              <div className="text-red-100 text-sm md:text-base">Dial 100 - Emergency Services</div>
             </div>
           </motion.a>
         </motion.div>
@@ -271,7 +277,7 @@ const EmergencyPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 px-4 md:px-0"
         >
           {emergencyTypes.map((emergency, index) => {
             const IconComponent = emergency.icon;
@@ -284,21 +290,21 @@ const EmergencyPage = () => {
                 whileHover={{ y: -8, scale: 1.02 }}
                 className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-2xl transition-all duration-300"
               >
-                <div className={`h-32 bg-gradient-to-br ${emergency.color} flex items-center justify-center relative overflow-hidden`}>
+                <div className={`h-24 md:h-32 bg-gradient-to-br ${emergency.color} flex items-center justify-center relative overflow-hidden`}>
                   <div className="absolute inset-0 bg-black/10"></div>
-                  <IconComponent className="w-12 h-12 text-white relative z-10" />
+                  <IconComponent className="w-8 h-8 md:w-12 md:h-12 text-white relative z-10" />
                 </div>
-                <div className="p-6 space-y-4">
+                <div className="p-4 md:p-6 space-y-3 md:space-y-4">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800">{emergency.title}</h3>
-                    <p className="text-gray-600 text-sm mt-2">{emergency.description}</p>
+                    <h3 className="text-lg md:text-xl font-bold text-gray-800">{emergency.title}</h3>
+                    <p className="text-gray-600 text-xs md:text-sm mt-2">{emergency.description}</p>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleEmergencyAlert(emergency)}
                     disabled={isSubmittingAlert}
-                    className={`w-full bg-gradient-to-r ${emergency.color} text-white py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`w-full bg-gradient-to-r ${emergency.color} text-white py-2.5 md:py-3 rounded-xl font-semibold transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation text-sm md:text-base min-h-[44px]`}
                   >
                     {isSubmittingAlert ? 'Sending Alert...' : 'Send Alert'}
                   </motion.button>
@@ -313,7 +319,7 @@ const EmergencyPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="max-w-2xl mx-auto"
+          className="max-w-2xl mx-auto px-4 md:px-0"
         >
           <LocationStatus />
         </motion.div>
@@ -323,6 +329,7 @@ const EmergencyPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7, duration: 0.6 }}
+          className="px-4 md:px-0"
         >
           <QuickActions />
         </motion.div>

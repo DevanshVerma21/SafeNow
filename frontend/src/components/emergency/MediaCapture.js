@@ -314,23 +314,23 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Photo Capture Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <CameraIcon className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <CameraIcon className="w-4 h-4 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-800">Photo Evidence</h3>
-              <p className="text-sm text-gray-500">{photos.length}/{maxPhotos} photos</p>
+              <h3 className="font-bold text-gray-800 text-sm md:text-base">Photo Evidence</h3>
+              <p className="text-xs md:text-sm text-gray-500">{photos.length}/{maxPhotos} photos</p>
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto">
             {/* Upload from Device Button */}
-            <label className="cursor-pointer">
+            <label className="cursor-pointer flex-1 sm:flex-none">
               <input
                 type="file"
                 accept="image/*"
@@ -342,12 +342,13 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center space-x-2 ${
+                className={`px-3 md:px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[44px] text-sm md:text-base ${
                   photos.length >= maxPhotos ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <PhotoIcon className="w-5 h-5" />
-                <span>Upload</span>
+                <PhotoIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">Upload</span>
+                <span className="sm:hidden">📷 Upload</span>
               </motion.div>
             </label>
 
@@ -357,19 +358,21 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={startCamera}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
+                className="flex-1 sm:flex-none px-3 md:px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[44px] text-sm md:text-base"
               >
-                <CameraIcon className="w-5 h-5" />
-                <span>Camera</span>
+                <CameraIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">Camera</span>
+                <span className="sm:hidden">📸 Cam</span>
               </motion.button>
             ) : (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={stopCamera}
-                className="px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all"
+                className="flex-1 sm:flex-none px-3 md:px-4 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all touch-manipulation min-h-[44px] text-sm md:text-base"
               >
-                Close
+                <span className="hidden sm:inline">Close</span>
+                <span className="sm:hidden">✕ Close</span>
               </motion.button>
             )}
           </div>
@@ -384,7 +387,7 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
             transition={{ duration: 0.3 }}
             className="mb-4"
           >
-            <div className="relative bg-black rounded-xl overflow-hidden" style={{ minHeight: '300px' }}>
+            <div className="relative bg-black rounded-xl overflow-hidden" style={{ minHeight: '250px' }}>
               {/* Camera Status Debug */}
               {cameraError && (
                 <div className="absolute top-2 left-2 right-2 bg-red-500 text-white p-2 rounded text-xs z-10">
@@ -403,8 +406,8 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
                 autoPlay
                 playsInline
                 muted
-                className="w-full h-64 object-cover bg-gray-900"
-                style={{ display: 'block', minHeight: '256px' }}
+                className="w-full h-48 sm:h-56 md:h-64 object-cover bg-gray-900"
+                style={{ display: 'block', minHeight: '192px' }}
               />
               
               {/* Capture Button */}
@@ -414,14 +417,14 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
                   whileTap={{ scale: 0.9 }}
                   onClick={capturePhoto}
                   disabled={photos.length >= maxPhotos}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl ${
+                  className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-2xl touch-manipulation ${
                     photos.length >= maxPhotos
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-white hover:bg-gray-100'
                   }`}
                   title={photos.length >= maxPhotos ? 'Maximum photos reached' : 'Capture photo'}
                 >
-                  <div className="w-12 h-12 rounded-full border-4 border-gray-800"></div>
+                  <div className="w-8 h-8 md:w-12 md:h-12 rounded-full border-2 md:border-4 border-gray-800"></div>
                 </motion.button>
               </div>
               
@@ -429,8 +432,8 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
               {!stream && !cameraError && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-white text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-2"></div>
-                    <p>Loading camera...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-white mx-auto mb-2"></div>
+                    <p className="text-sm md:text-base">Loading camera...</p>
                   </div>
                 </div>
               )}
@@ -440,7 +443,7 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
 
         {/* Captured Photos Grid */}
         {photos.length > 0 && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-3">
             {photos.map((photo) => (
               <motion.div
                 key={photo.id}
@@ -451,15 +454,15 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
                 <img
                   src={photo.dataUrl}
                   alt="Captured"
-                  className="w-full h-24 object-cover rounded-lg border-2 border-gray-200"
+                  className="w-full h-20 sm:h-24 object-cover rounded-lg border-2 border-gray-200"
                 />
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => deletePhoto(photo.id)}
-                  className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                  className="absolute top-1 right-1 w-5 h-5 md:w-6 md:h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg touch-manipulation"
                 >
-                  <XMarkIcon className="w-4 h-4" />
+                  <XMarkIcon className="w-3 h-3 md:w-4 md:h-4" />
                 </motion.button>
               </motion.div>
             ))}
@@ -468,24 +471,24 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
       </div>
 
       {/* Audio Recording Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-              <MicrophoneIcon className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
+              <MicrophoneIcon className="w-4 h-4 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-800">Voice Message</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="font-bold text-gray-800 text-sm md:text-base">Voice Message</h3>
+              <p className="text-xs md:text-sm text-gray-500">
                 {audioBlob ? 'Recorded' : 'Record voice message'}
               </p>
             </div>
           </div>
 
           {!audioBlob && !isRecording && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full sm:w-auto">
               {/* Upload Audio Button */}
-              <label className="cursor-pointer">
+              <label className="cursor-pointer flex-1 sm:flex-none">
                 <input
                   type="file"
                   accept="audio/*"
@@ -495,10 +498,11 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
+                  className="px-3 md:px-4 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[44px] text-sm md:text-base"
                 >
-                  <PhotoIcon className="w-5 h-5" />
-                  <span>Upload</span>
+                  <PhotoIcon className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Upload</span>
+                  <span className="sm:hidden">🎵 Upload</span>
                 </motion.div>
               </label>
 
@@ -507,10 +511,11 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={startRecording}
-                className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
+                className="flex-1 sm:flex-none px-3 md:px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[44px] text-sm md:text-base"
               >
-                <MicrophoneIcon className="w-5 h-5" />
-                <span>Record</span>
+                <MicrophoneIcon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden sm:inline">Record</span>
+                <span className="sm:hidden">🎤 Rec</span>
               </motion.button>
             </div>
           )}
@@ -520,10 +525,10 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={stopRecording}
-              className="px-4 py-2 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
+              className="w-full sm:w-auto px-3 md:px-4 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[44px] text-sm md:text-base"
             >
-              <StopIcon className="w-5 h-5" />
-              <span>Stop</span>
+              <StopIcon className="w-4 h-4 md:w-5 md:h-5" />
+              <span>Stop Recording</span>
             </motion.button>
           )}
         </div>
@@ -533,17 +538,17 @@ const MediaCapture = ({ onMediaCaptured, maxPhotos = 3 }) => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between"
+            className="bg-red-50 border border-red-200 rounded-xl p-3 md:p-4 flex flex-col sm:flex-row items-center justify-between gap-2"
           >
             <div className="flex items-center space-x-3">
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 1 }}
-                className="w-4 h-4 bg-red-500 rounded-full"
+                className="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full"
               />
-              <span className="text-red-700 font-semibold">Recording...</span>
+              <span className="text-red-700 font-semibold text-sm md:text-base">Recording...</span>
             </div>
-            <span className="text-2xl font-bold text-red-600 font-mono">
+            <span className="text-xl md:text-2xl font-bold text-red-600 font-mono">
               {formatTime(recordingTime)}
             </span>
           </motion.div>

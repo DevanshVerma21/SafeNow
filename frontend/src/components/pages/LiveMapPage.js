@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useLocation } from '../../context/LocationContext';
+import HamburgerMenu from '../layout/HamburgerMenu';
 import LiveMap from '../dashboard/LiveMap';
 import LocationStatus from '../dashboard/LocationStatus';
 import { 
@@ -216,8 +217,8 @@ const LiveMapPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         {/* Header */}
         <motion.div
           initial={{ y: -50, opacity: 0 }}
@@ -225,13 +226,18 @@ const LiveMapPage = () => {
           transition={{ duration: 0.6 }}
           className="text-center space-y-4"
         >
-          <div className="flex items-center justify-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <MapPinIcon className="w-6 h-6 text-white" />
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 mb-4">
+            <div className="flex items-center justify-start w-full sm:w-auto">
+              <HamburgerMenu />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800">Live Emergency Map</h1>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <MapPinIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+              </div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800">Live Emergency Map</h1>
+            </div>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
             Real-time view of emergency alerts and responder locations in your area
           </p>
         </motion.div>
@@ -241,7 +247,7 @@ const LiveMapPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
         >
           {statsCards.map((stat, index) => {
             const IconComponent = stat.icon;
@@ -252,15 +258,15 @@ const LiveMapPage = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.1 * (index + 3), duration: 0.5 }}
                 whileHover={{ y: -4, scale: 1.02 }}
-                className={`${stat.bgColor} rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300`}
+                className={`${stat.bgColor} rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                    <p className="text-xs md:text-sm text-gray-600 mb-1">{stat.label}</p>
+                    <p className={`text-lg md:text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                   </div>
-                  <div className={`w-12 h-12 ${stat.iconBg} rounded-xl flex items-center justify-center shadow-lg`}>
-                    <IconComponent className="w-6 h-6 text-white" />
+                  <div className={`w-10 h-10 md:w-12 md:h-12 ${stat.iconBg} rounded-xl flex items-center justify-center shadow-lg`}>
+                    <IconComponent className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
                 </div>
               </motion.div>
@@ -273,12 +279,12 @@ const LiveMapPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          className="space-y-6"
+          className="space-y-4 md:space-y-6"
         >
           {/* Alert Filters */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800">Alert Filters</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <h3 className="text-base md:text-lg font-bold text-gray-800 px-4 md:px-0">Alert Filters</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 px-4 md:px-0">
               {mapControls.map((control, index) => {
                 const IconComponent = control.icon;
                 const isSelected = selectedFilter === control.key;
@@ -291,18 +297,18 @@ const LiveMapPage = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedFilter(control.key)}
-                    className={`p-4 rounded-2xl transition-all duration-300 ${
+                    className={`p-3 md:p-4 rounded-2xl transition-all duration-300 min-h-[80px] touch-manipulation ${
                       isSelected 
                         ? `bg-gradient-to-r ${control.color} text-white shadow-lg` 
                         : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <IconComponent className="w-5 h-5" />
-                        <span className="font-semibold">{control.label}</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-between h-full">
+                      <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                        <IconComponent className="w-4 h-4 md:w-5 md:h-5" />
+                        <span className="font-semibold text-xs md:text-sm lg:text-base">{control.label}</span>
                       </div>
-                      <span className={`text-sm px-2 py-1 rounded-full ${
+                      <span className={`text-xs md:text-sm px-2 py-1 rounded-full ${
                         isSelected ? 'bg-white/20' : 'bg-gray-100'
                       }`}>
                         {control.count}
@@ -316,8 +322,8 @@ const LiveMapPage = () => {
 
           {/* Responder Filters */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-800">Responder Filters</h3>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <h3 className="text-base md:text-lg font-bold text-gray-800 px-4 md:px-0">Responder Filters</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 px-4 md:px-0">
               {responderControls.map((control, index) => {
                 const IconComponent = control.icon;
                 const isSelected = selectedResponderType === control.key;
@@ -330,18 +336,18 @@ const LiveMapPage = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedResponderType(control.key)}
-                    className={`p-4 rounded-2xl transition-all duration-300 ${
+                    className={`p-3 md:p-4 rounded-2xl transition-all duration-300 min-h-[80px] touch-manipulation ${
                       isSelected 
                         ? `bg-gradient-to-r ${control.color} text-white shadow-lg` 
                         : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md border border-gray-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <IconComponent className="w-5 h-5" />
-                        <span className="font-semibold text-sm">{control.label}</span>
+                    <div className="flex flex-col sm:flex-row items-center justify-between h-full">
+                      <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                        <IconComponent className="w-4 h-4 md:w-5 md:h-5" />
+                        <span className="font-semibold text-xs md:text-sm">{control.label}</span>
                       </div>
-                      <span className={`text-sm px-2 py-1 rounded-full ${
+                      <span className={`text-xs md:text-sm px-2 py-1 rounded-full ${
                         isSelected ? 'bg-white/20' : 'bg-gray-100'
                       }`}>
                         {control.count}
@@ -359,11 +365,11 @@ const LiveMapPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mx-4 md:mx-0"
         >
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">Real-Time Emergency Map</h3>
+          <div className="p-4 md:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h3 className="text-lg md:text-xl font-bold text-gray-800">Real-Time Emergency Map</h3>
               <div className="flex items-center space-x-2">
                 <div className={`w-3 h-3 rounded-full ${
                   connectionStatus === 'connected' ? 'bg-green-500' : 'bg-red-500'
@@ -374,11 +380,12 @@ const LiveMapPage = () => {
               </div>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             <LiveMap 
               alerts={getFilteredAlerts()} 
               responders={getFilteredResponders()}
-              height="500px"
+              height="400px"
+              className="w-full h-full"
             />
           </div>
         </motion.div>
@@ -388,7 +395,7 @@ const LiveMapPage = () => {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="max-w-2xl mx-auto"
+          className="max-w-2xl mx-auto px-4 md:px-0"
         >
           <LocationStatus />
         </motion.div>
