@@ -227,11 +227,11 @@ const Sidebar = () => {
         
         <div className="relative flex items-center space-x-2">
           <motion.div
-            whileHover={{ scale: 1.1, rotate: 360 }}
-            transition={{ duration: 0.3 }}
-            className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center shadow-lg border border-white/30"
+            whileHover={{ scale: 1.1, rotate: [0, -10, 10, -10, 0] }}
+            transition={{ duration: 0.5 }}
+            className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg border border-white/20 p-1"
           >
-            <span className="text-white text-sm font-bold">S</span>
+            <img src="/logo.svg" alt="SafeNow Logo" className="w-full h-full object-contain" />
           </motion.div>
           <div className="flex-1">
             <h1 className="text-lg font-bold text-white drop-shadow-lg">SafeNow</h1>
@@ -395,10 +395,13 @@ const Sidebar = () => {
         transition={{ delay: 0.8, duration: 0.5 }}
         className="p-4 text-center border-t border-gray-200 bg-gradient-to-t from-gray-50 to-transparent"
       >
-        <div className="text-xs text-gray-500">
-          <p className="font-bold text-red-600 mb-1">SafeNow</p>
-          <p>Emergency Response System</p>
-          <p className="mt-2 text-gray-400">v2.0.1</p>
+        <div className="flex flex-col items-center space-y-2">
+          <img src="/logo.svg" alt="SafeNow" className="w-8 h-8 opacity-75" />
+          <div className="text-xs text-gray-500">
+            <p className="font-bold text-red-600 mb-1">SafeNow</p>
+            <p>Emergency Response System</p>
+            <p className="mt-2 text-gray-400">v2.0.1</p>
+          </div>
         </div>
       </motion.div>
 

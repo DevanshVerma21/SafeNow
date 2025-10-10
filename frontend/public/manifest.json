@@ -1,0 +1,27 @@
+{
+  "short_name": "SafeNow",
+  "name": "SafeNow - Emergency Response System",
+  "description": "Emergency. Unified. Immediate.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "logo192.png.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1976D2",
+  "background_color": "#1a2332",
+  "orientation": "portrait"
+}

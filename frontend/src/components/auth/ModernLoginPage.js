@@ -161,45 +161,49 @@ const ModernLoginPage = () => {
         {/* Logo and title */}
         <div className="text-center">
           <motion.div
-            className="mx-auto w-24 h-24 rounded-full flex items-center justify-center mb-6 relative"
-            style={{
-              background: 'linear-gradient(135deg, #ff0844 0%, #ff6b6b 50%, #ffb199 100%)',
-              boxShadow: '0 15px 35px rgba(255, 8, 68, 0.4), 0 5px 15px rgba(0, 0, 0, 0.12), 0 0 0 8px rgba(255, 8, 68, 0.1)'
-            }}
+            className="mx-auto w-32 h-32 flex items-center justify-center mb-6 relative"
+            initial={{ scale: 0, rotate: -180 }}
             animate={{ 
-              scale: [1, 1.05, 1],
-              rotateY: [0, 10, 0],
+              scale: 1,
+              rotate: 0,
             }}
             transition={{ 
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut"
+              duration: 0.8,
+              type: "spring",
+              stiffness: 100
             }}
           >
-            <motion.span 
-              className="text-white text-3xl font-bold font-display"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              SOS
-            </motion.span>
+            {/* Logo image */}
+            <motion.img 
+              src="/logo.svg" 
+              alt="SafeNow Logo" 
+              className="w-full h-full object-contain"
+              animate={{ 
+                filter: [
+                  'drop-shadow(0 0 8px rgba(79, 195, 247, 0.4))', 
+                  'drop-shadow(0 0 16px rgba(79, 195, 247, 0.7))', 
+                  'drop-shadow(0 0 8px rgba(79, 195, 247, 0.4))'
+                ]
+              }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+            />
             
             {/* Animated pulse rings */}
             <motion.div
-              className="absolute inset-0 rounded-full border-2 border-white/30"
+              className="absolute inset-0 rounded-full border-2 border-blue-500/30"
               animate={{ 
-                scale: [1, 1.2, 1], 
-                opacity: [0.7, 0, 0.7] 
+                scale: [1, 1.3, 1], 
+                opacity: [0.6, 0, 0.6] 
               }}
               transition={{ duration: 2, repeat: Infinity }}
             />
             <motion.div
-              className="absolute inset-0 rounded-full border-2 border-white/20"
+              className="absolute inset-0 rounded-full border-2 border-cyan-400/20"
               animate={{ 
-                scale: [1, 1.4, 1], 
-                opacity: [0.5, 0, 0.5] 
+                scale: [1, 1.5, 1], 
+                opacity: [0.4, 0, 0.4] 
               }}
-              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.6 }}
             />
           </motion.div>
           

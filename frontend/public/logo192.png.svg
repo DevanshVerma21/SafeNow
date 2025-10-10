@@ -1,0 +1,46 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4FC3F7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="96" fill="#1a2332"/>
+  
+  <!-- Orbital ring -->
+  <circle cx="96" cy="96" r="80" fill="none" stroke="#4FC3F7" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Orbital dots -->
+  <circle cx="96" cy="16" r="4" fill="white" opacity="0.8"/>
+  <circle cx="176" cy="96" r="4" fill="white" opacity="0.8"/>
+  <circle cx="96" cy="176" r="4" fill="white" opacity="0.8"/>
+  <circle cx="16" cy="96" r="4" fill="white" opacity="0.8"/>
+  
+  <!-- Shield -->
+  <path d="M 96 40 C 75 40 58 44 48 52 L 48 110 C 48 135 70 155 96 170 C 122 155 144 135 144 110 L 144 52 C 134 44 117 40 96 40 Z" 
+        fill="url(#shieldGrad)" opacity="0.95"/>
+  
+  <!-- Inner shield -->
+  <path d="M 96 50 C 78 50 64 54 56 60 L 56 110 C 56 130 74 145 96 158 C 118 145 136 130 136 110 L 136 60 C 128 54 114 50 96 50 Z" 
+        fill="none" stroke="#0D47A1" stroke-width="2" opacity="0.4"/>
+  
+  <!-- Arrow up -->
+  <path d="M 96 65 L 106 78 L 100 78 L 100 95 L 92 95 L 92 78 L 86 78 Z" 
+        fill="white"/>
+  
+  <!-- Flame bottom -->
+  <path d="M 96 95 C 96 95 88 100 88 108 C 88 114 92 118 96 120 C 100 118 104 114 104 108 C 104 100 96 95 96 95 Z" 
+        fill="#4FC3F7"/>
+  
+  <!-- Flame middle -->
+  <path d="M 96 120 C 96 120 90 124 90 130 C 90 135 93 138 96 140 C 99 138 102 135 102 130 C 102 124 96 120 96 120 Z" 
+        fill="white" opacity="0.9"/>
+  
+  <!-- Side curves -->
+  <path d="M 68 90 Q 75 100 75 110 Q 75 120 68 130" 
+        fill="none" stroke="#4FC3F7" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 124 90 Q 117 100 117 110 Q 117 120 124 130" 
+        fill="none" stroke="#4FC3F7" stroke-width="4" stroke-linecap="round"/>
+</svg>

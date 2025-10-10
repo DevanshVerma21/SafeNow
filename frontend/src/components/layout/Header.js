@@ -24,9 +24,13 @@ const Header = () => {
         <div className="flex justify-center items-center h-16">
           <div className="flex items-center">
             <Link to={getDashboardPath()} className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white text-lg font-bold">S</span>
-              </div>
+              <motion.div 
+                whileHover={{ scale: 1.1, rotate: [0, -5, 5, -5, 0] }}
+                transition={{ duration: 0.5 }}
+                className="w-10 h-10 flex items-center justify-center"
+              >
+                <img src="/logo.svg" alt="SafeNow Logo" className="w-full h-full object-contain" />
+              </motion.div>
               <span className="text-2xl font-bold gradient-text">
                 SafeNow
               </span>
