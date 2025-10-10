@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useLocation } from '../../context/LocationContext';
 import { 
   MapPinIcon,
@@ -13,6 +14,7 @@ import toast from 'react-hot-toast';
 import HamburgerMenu from '../layout/HamburgerMenu';
 
 const QuickActions = () => {
+  const navigate = useNavigate();
   const { getCurrentLocation, startTracking, stopTracking, isTracking } = useLocation();
 
   const actions = [
@@ -67,8 +69,8 @@ const QuickActions = () => {
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
       action: () => {
-        // TODO: Open emergency contacts modal
-        toast.success('Emergency contacts feature coming soon');
+        navigate('/emergency-contacts');
+        toast.success('Opening Emergency Contacts');
       }
     },
     {

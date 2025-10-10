@@ -317,27 +317,27 @@ const Users = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
         onClick={() => setShowAddModal(false)}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+          className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Add New User</h2>
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">Add New User</h2>
             <button
               onClick={() => setShowAddModal(false)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 min-h-[44px] min-w-[44px] hover:bg-gray-100 rounded-lg transition-colors touch-manipulation"
             >
-              <XCircleIcon className="w-6 h-6 text-gray-500" />
+              <XCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Name *
@@ -346,7 +346,7 @@ const Users = () => {
                 type="text"
                 value={newUser.name}
                 onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
                 placeholder="Enter full name"
               />
             </div>
@@ -359,7 +359,7 @@ const Users = () => {
                 type="email"
                 value={newUser.email}
                 onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
                 placeholder="Enter email address"
               />
             </div>
@@ -372,7 +372,7 @@ const Users = () => {
                 type="tel"
                 value={newUser.phone}
                 onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
                 placeholder="+91-XXXXXXXXXX"
               />
             </div>
@@ -384,7 +384,7 @@ const Users = () => {
               <select
                 value={newUser.role}
                 onChange={(e) => setNewUser({ ...newUser, role: e.target.value, specialization: '' })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
               >
                 <option value="user">Citizen</option>
                 <option value="responder">Responder</option>
@@ -400,7 +400,7 @@ const Users = () => {
                 <select
                   value={newUser.specialization}
                   onChange={(e) => setNewUser({ ...newUser, specialization: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
                 >
                   <option value="">Select specialization</option>
                   <option value="Medical">Medical</option>
@@ -418,7 +418,7 @@ const Users = () => {
                 type="text"
                 value={newUser.location}
                 onChange={(e) => setNewUser({ ...newUser, location: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
                 placeholder="City, State"
               />
             </div>
@@ -430,7 +430,7 @@ const Users = () => {
               <select
                 value={newUser.status}
                 onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
               >
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -439,16 +439,16 @@ const Users = () => {
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4 mt-8">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6 sm:mt-8">
             <button
               onClick={() => setShowAddModal(false)}
-              className="px-6 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors"
+              className="w-full sm:w-auto px-4 sm:px-6 py-3 min-h-[48px] touch-manipulation text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-colors text-sm md:text-base"
             >
               Cancel
             </button>
             <button
               onClick={handleAddUser}
-              className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors"
+              className="w-full sm:w-auto px-4 sm:px-6 py-3 min-h-[48px] touch-manipulation bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-colors text-sm md:text-base"
             >
               Add User
             </button>
@@ -464,118 +464,118 @@ const Users = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
         onClick={onClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-2xl p-4 sm:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">User Details</h2>
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">User Details</h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              className="p-2 min-h-[44px] min-w-[44px] hover:bg-gray-100 rounded-xl transition-colors touch-manipulation"
             >
-              <XCircleIcon className="w-6 h-6 text-gray-500" />
+              <XCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Basic Info */}
-            <div className="flex items-center space-x-4">
-              <div className={`w-16 h-16 bg-gradient-to-br from-${getRoleColor(user.role)}-500 to-${getRoleColor(user.role)}-600 rounded-2xl flex items-center justify-center`}>
-                <UserIcon className="w-8 h-8 text-white" />
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className={`w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-${getRoleColor(user.role)}-500 to-${getRoleColor(user.role)}-600 rounded-2xl flex items-center justify-center`}>
+                <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">{user.name}</h3>
-                <p className="text-gray-600">{user.email}</p>
-                <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full bg-${getRoleColor(user.role)}-100 text-${getRoleColor(user.role)}-800 mt-2`}>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">{user.name}</h3>
+                <p className="text-sm sm:text-base text-gray-600">{user.email}</p>
+                <span className={`inline-block px-2 sm:px-3 py-1 text-xs font-semibold rounded-full bg-${getRoleColor(user.role)}-100 text-${getRoleColor(user.role)}-800 mt-1 sm:mt-2`}>
                   {user.role} {user.specialization && `- ${user.specialization}`}
                 </span>
               </div>
             </div>
 
             {/* Contact & Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                 <div className="flex items-center space-x-2 mb-2">
-                  <PhoneIcon className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium text-gray-700">Phone</span>
+                  <PhoneIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="font-medium text-gray-700 text-sm sm:text-base">Phone</span>
                 </div>
-                <p className="text-gray-900">{user.phone}</p>
+                <p className="text-gray-900 text-sm sm:text-base">{user.phone}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                 <div className="flex items-center space-x-2 mb-2">
-                  <MapPinIcon className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium text-gray-700">Location</span>
+                  <MapPinIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="font-medium text-gray-700 text-sm sm:text-base">Location</span>
                 </div>
-                <p className="text-gray-900">{user.location}</p>
+                <p className="text-gray-900 text-sm sm:text-base">{user.location}</p>
               </div>
             </div>
 
             {/* Status & Activity */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gray-50 p-4 rounded-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
                 <div className="flex items-center space-x-2 mb-2">
                   <div className={`w-3 h-3 bg-${getStatusColor(user.status)}-500 rounded-full`}></div>
-                  <span className="font-medium text-gray-700">Status</span>
+                  <span className="font-medium text-gray-700 text-sm sm:text-base">Status</span>
                 </div>
-                <p className="text-gray-900 capitalize">{user.status}</p>
+                <p className="text-gray-900 capitalize text-sm sm:text-base">{user.status}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <span className="font-medium text-gray-700 block mb-2">Joined</span>
-                <p className="text-gray-900">{new Date(user.joinDate).toLocaleDateString()}</p>
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
+                <span className="font-medium text-gray-700 block mb-2 text-sm sm:text-base">Joined</span>
+                <p className="text-gray-900 text-sm sm:text-base">{new Date(user.joinDate).toLocaleDateString()}</p>
               </div>
-              <div className="bg-gray-50 p-4 rounded-xl">
-                <span className="font-medium text-gray-700 block mb-2">Last Seen</span>
-                <p className="text-gray-900">{formatLastSeen(user.lastSeen)}</p>
+              <div className="bg-gray-50 p-3 sm:p-4 rounded-xl">
+                <span className="font-medium text-gray-700 block mb-2 text-sm sm:text-base">Last Seen</span>
+                <p className="text-gray-900 text-sm sm:text-base">{formatLastSeen(user.lastSeen)}</p>
               </div>
             </div>
 
             {/* Role-specific Info */}
             {user.role === 'responder' && (
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <h4 className="font-bold text-blue-900 mb-2">Responder Stats</h4>
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50 p-3 sm:p-4 rounded-xl">
+                <h4 className="font-bold text-blue-900 mb-2 text-sm sm:text-base">Responder Stats</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <span className="text-sm text-blue-600">Specialization</span>
-                    <p className="font-semibold text-blue-900">{user.specialization}</p>
+                    <span className="text-xs sm:text-sm text-blue-600">Specialization</span>
+                    <p className="font-semibold text-blue-900 text-sm sm:text-base">{user.specialization}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-blue-600">Responses</span>
-                    <p className="font-semibold text-blue-900">{user.responseCount}</p>
+                    <span className="text-xs sm:text-sm text-blue-600">Responses</span>
+                    <p className="font-semibold text-blue-900 text-sm sm:text-base">{user.responseCount}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {user.role === 'user' && (
-              <div className="bg-green-50 p-4 rounded-xl">
-                <h4 className="font-bold text-green-900 mb-2">User Stats</h4>
+              <div className="bg-green-50 p-3 sm:p-4 rounded-xl">
+                <h4 className="font-bold text-green-900 mb-2 text-sm sm:text-base">User Stats</h4>
                 <div>
-                  <span className="text-sm text-green-600">Emergency Contacts</span>
-                  <p className="font-semibold text-green-900">{user.emergencyContacts} contacts configured</p>
+                  <span className="text-xs sm:text-sm text-green-600">Emergency Contacts</span>
+                  <p className="font-semibold text-green-900 text-sm sm:text-base">{user.emergencyContacts} contacts configured</p>
                 </div>
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-3 sm:pt-4 border-t border-gray-200">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl font-medium transition-colors"
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-3 sm:py-2 min-h-[48px] touch-manipulation rounded-xl font-medium transition-colors text-sm sm:text-base"
               >
                 Edit User
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors"
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-3 sm:py-2 min-h-[48px] touch-manipulation rounded-xl font-medium transition-colors text-sm sm:text-base"
               >
                 Send Message
               </motion.button>
@@ -595,49 +595,49 @@ const Users = () => {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-4 md:space-y-6 lg:space-y-8 max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-200 gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center bg-white rounded-2xl p-3 sm:p-4 md:p-6 shadow-sm border border-gray-200 gap-3 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <HamburgerMenu />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">Manage all system users, responders, and administrators</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">User Management</h1>
+            <p className="text-gray-600 mt-1 md:mt-2 text-xs sm:text-sm md:text-base">Manage all system users, responders, and administrators</p>
           </div>
         </div>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setShowAddModal(true)}
-          className="w-full lg:w-auto bg-red-500 hover:bg-red-600 active:bg-red-700 text-white px-4 md:px-6 py-3 min-h-[48px] touch-manipulation rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm md:text-base"
+          className="w-full lg:w-auto bg-red-500 hover:bg-red-600 active:bg-red-700 text-white px-3 sm:px-4 md:px-6 py-3 min-h-[48px] touch-manipulation rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 shadow-lg text-sm md:text-base"
         >
-          <PlusIcon className="w-5 h-5" />
+          <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Add User</span>
         </motion.button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-4 md:p-6 lg:p-8 shadow-lg border border-gray-200">
-        <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
+      <div className="bg-white rounded-2xl p-3 sm:p-4 md:p-6 lg:p-8 shadow-lg border border-gray-200">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 md:gap-6">
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search users by name, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm md:text-base"
+              className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-sm md:text-base"
             />
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <div className="flex items-center space-x-2">
-              <FunnelIcon className="w-5 h-5 text-gray-400" />
-              <span className="text-sm font-medium text-gray-600 whitespace-nowrap">Filter by:</span>
+              <FunnelIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <span className="text-xs sm:text-sm font-medium text-gray-600 whitespace-nowrap">Filter by:</span>
             </div>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full sm:w-auto px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
+              className="w-full sm:w-auto px-3 sm:px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm md:text-base"
             >
               <option value="all">All Roles</option>
               <option value="user">Citizens</option>
@@ -650,21 +650,86 @@ const Users = () => {
 
       {/* Users List */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div className="p-4 md:p-6 lg:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-          <h3 className="text-base md:text-lg font-bold text-gray-900">Users ({filteredUsers.length})</h3>
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 border-b border-gray-200 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
+          <h3 className="text-sm sm:text-base md:text-lg font-bold text-gray-900">Users ({filteredUsers.length})</h3>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={fetchUsers}
             disabled={refreshing}
-            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 min-h-[44px] touch-manipulation bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50 text-sm md:text-base"
+            className="w-full sm:w-auto flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 min-h-[44px] touch-manipulation bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50 text-xs sm:text-sm md:text-base"
           >
-            <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${refreshing ? 'animate-spin' : ''}`} />
             <span>{refreshing ? 'Refreshing...' : 'Refresh'}</span>
           </motion.button>
         </div>
         
-        <div className="overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
+        {/* Mobile Card View - visible on small screens */}
+        <div className="block md:hidden">
+          {filteredUsers.map((user, index) => (
+            <motion.div
+              key={user.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="p-3 sm:p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-start space-x-3">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-${getRoleColor(user.role)}-500 to-${getRoleColor(user.role)}-600 rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">{user.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">{user.email}</p>
+                    </div>
+                    <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowUserModal(true);
+                        }}
+                        className="p-1.5 sm:p-2 min-h-[36px] min-w-[36px] touch-manipulation bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-600 rounded-lg transition-colors"
+                      >
+                        <EyeIcon className="w-3.5 h-3.5" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-1.5 sm:p-2 min-h-[36px] min-w-[36px] touch-manipulation bg-green-100 hover:bg-green-200 active:bg-green-300 text-green-600 rounded-lg transition-colors"
+                      >
+                        <PencilIcon className="w-3.5 h-3.5" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-1.5 sm:p-2 min-h-[36px] min-w-[36px] touch-manipulation bg-red-100 hover:bg-red-200 active:bg-red-300 text-red-600 rounded-lg transition-colors"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                      </motion.button>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full bg-${getRoleColor(user.role)}-100 text-${getRoleColor(user.role)}-800`}>
+                      {user.role} {user.specialization && `- ${user.specialization}`}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <div className={`w-2 h-2 bg-${getStatusColor(user.status)}-500 rounded-full`}></div>
+                      <span className="text-xs font-medium text-gray-900 capitalize">{user.status}</span>
+                    </div>
+                    <span className="text-xs text-gray-500">{formatLastSeen(user.lastSeen)}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Desktop Table View - hidden on small screens */}
+        <div className="hidden md:block overflow-x-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
           <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50">
               <tr>

@@ -389,62 +389,64 @@ const LiveMap = () => {
   return (
     <div className="modern-card overflow-hidden">
       {/* Map Header */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between">
+      <div className="p-3 md:p-4 border-b border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center">
-            <MapIcon className="w-6 h-6 text-blue-600 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900">Live Emergency Map</h3>
+            <MapIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600 mr-2" />
+            <h3 className="text-base md:text-lg font-semibold text-gray-900">Live Emergency Map</h3>
           </div>
           
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowAlerts(!showAlerts)}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 ${
+              className={`flex items-center space-x-1 px-2 md:px-3 py-1.5 md:py-1 rounded-full text-xs md:text-sm font-medium transition-colors duration-200 touch-manipulation min-h-[44px] ${
                 showAlerts 
                   ? 'bg-red-100 text-red-700' 
                   : 'bg-gray-100 text-gray-500'
               }`}
             >
-              {showAlerts ? <EyeIcon className="w-4 h-4" /> : <EyeSlashIcon className="w-4 h-4" />}
-              <span>Alerts</span>
+              {showAlerts ? <EyeIcon className="w-3 h-3 md:w-4 md:h-4" /> : <EyeSlashIcon className="w-3 h-3 md:w-4 md:h-4" />}
+              <span className="hidden sm:inline">Alerts</span>
+              <span className="sm:hidden">🚨</span>
             </button>
             
             <button
               onClick={() => setShowResponders(!showResponders)}
-              className={`flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 ${
+              className={`flex items-center space-x-1 px-2 md:px-3 py-1.5 md:py-1 rounded-full text-xs md:text-sm font-medium transition-colors duration-200 touch-manipulation min-h-[44px] ${
                 showResponders 
                   ? 'bg-green-100 text-green-700' 
                   : 'bg-gray-100 text-gray-500'
               }`}
             >
-              {showResponders ? <EyeIcon className="w-4 h-4" /> : <EyeSlashIcon className="w-4 h-4" />}
-              <span>Responders</span>
+              {showResponders ? <EyeIcon className="w-3 h-3 md:w-4 md:h-4" /> : <EyeSlashIcon className="w-3 h-3 md:w-4 md:h-4" />}
+              <span className="hidden sm:inline">Responders</span>
+              <span className="sm:hidden">🚑</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Map Container */}
-      <div className="relative h-[600px] w-full overflow-hidden">
+      <div className="relative h-[400px] sm:h-[500px] md:h-[600px] w-full overflow-hidden">
         <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
         
         {/* Map Legend */}
-        <div className="absolute bottom-4 right-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+        <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-lg p-2 sm:p-3 shadow-lg">
           <h4 className="text-xs font-semibold text-gray-900 mb-2">Legend</h4>
-          <div className="space-y-2">
+          <div className="space-y-1 sm:space-y-2">
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-500 rounded-full"></div>
               <span className="text-xs text-gray-600">Your Location</span>
             </div>
             {showAlerts && (
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
                 <span className="text-xs text-gray-600">Emergency Alert</span>
               </div>
             )}
             {showResponders && (
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
                 <span className="text-xs text-gray-600">Available Responder</span>
               </div>
             )}
@@ -452,7 +454,7 @@ const LiveMap = () => {
         </div>
 
         {/* Stats Overlay */}
-        <div className="absolute top-4 left-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-lg p-2 sm:p-3 shadow-lg">
           <div className="space-y-1">
             <div className="text-xs text-gray-600">
               Active Alerts: <span className="font-semibold text-red-600">{alerts.length}</span>
