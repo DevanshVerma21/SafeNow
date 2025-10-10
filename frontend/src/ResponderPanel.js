@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useWebSocket } from './context/WebSocketContext';
 import toast from 'react-hot-toast';
+import HamburgerMenu from './components/layout/HamburgerMenu';
 
 const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
 
@@ -86,27 +87,32 @@ export default function ResponderPanel({ onResponderRegistered }) {
   const assigned = openAlerts.filter(a => a.assigned_to && a.assigned_to === responderId);
 
   return (
-    <div style={{ border: '1px solid #ccc', padding: 20, marginTop: 10, borderRadius: 8 }}>
-      <h4 style={{ marginBottom: 15, color: '#333' }}>Emergency Responder Panel</h4>
+    <div className="border border-gray-300 p-4 md:p-5 mt-3 rounded-lg bg-white shadow-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <HamburgerMenu />
+        <h4 className="text-lg md:text-xl font-bold text-gray-800">Emergency Responder Panel</h4>
+      </div>
       
       {/* Registration Section */}
-      <div style={{ marginBottom: 20, padding: 15, backgroundColor: '#f8f9fa', borderRadius: 6 }}>
-        <h5 style={{ marginBottom: 10 }}>Responder Registration</h5>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <label>
-            Lat: <input 
+      <div className="mb-5 p-4 bg-gray-50 rounded-lg">
+        <h5 className="mb-3 text-base font-semibold text-gray-700">Responder Registration</h5>
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <label className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <span className="text-sm font-medium text-gray-600">Lat:</span>
+            <input 
               value={lat} 
               onChange={e => setLat(e.target.value)}
               placeholder="Latitude"
-              style={{ marginLeft: 5, padding: 4 }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm touch-manipulation"
             />
           </label>
-          <label>
-            Lng: <input 
+          <label className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <span className="text-sm font-medium text-gray-600">Lng:</span>
+            <input 
               value={lng} 
               onChange={e => setLng(e.target.value)}
               placeholder="Longitude"
-              style={{ marginLeft: 5, padding: 4 }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm touch-manipulation"
             />
           </label>
           <label>

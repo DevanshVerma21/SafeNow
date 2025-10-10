@@ -9,6 +9,7 @@ import {
   TrashIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import HamburgerMenu from '../layout/HamburgerMenu';
 
 const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
 
@@ -28,38 +29,13 @@ const EmergencyContacts = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      
-      if (!token) {
-        console.error('No token found');
-        toast.error('Please login to view emergency contacts');
-        return;
-      }
-      
-      console.log('Fetching from:', `${API_BASE}/emergency-contacts`);
-      console.log('Token:', token.substring(0, 20) + '...');
-      
       const response = await axios.get(`${API_BASE}/emergency-contacts`, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
-      console.log('Emergency contacts response:', response.data);
       setContacts(response.data);
     } catch (error) {
       console.error('Error fetching emergency contacts:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      
-      if (error.response?.status === 401) {
-        toast.error('Authentication failed. Please login again.');
-      } else if (error.response?.status === 404) {
-        toast.error('Emergency contacts endpoint not found');
-      } else {
-        toast.error('Failed to load emergency contacts');
-      }
-      
+      toast.error('Failed to load emergency contacts');
       // Fallback to default contacts on error
       setContacts([
         { id: 'default-1', name: 'Emergency Services (Police)', phone: '100', relationship: 'emergency', priority: 1, is_default: true },
@@ -148,23 +124,25 @@ const EmergencyContacts = () => {
   };
 
   return (
-    <div className="modern-card p-6 bg-gradient-to-br from-white to-gray-50">
-      <div className="flex items-center justify-between mb-6">
+    <div className="modern-card p-4 md:p-6 bg-gradient-to-br from-white to-gray-50">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
         <div className="flex items-center gap-3">
+          <HamburgerMenu />
           <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-            <UserGroupIcon className="w-6 h-6 text-white" />
+            <UserGroupIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Emergency Contacts
           </h3>
         </div>
         
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="p-2.5 text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 p-2.5 text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 touch-manipulation"
           title="Add new contact"
         >
           <PlusIcon className="w-5 h-5" />
+          <span className="sm:hidden">Add Contact</span>
         </button>
       </div>
 
@@ -187,7 +165,7 @@ const EmergencyContacts = () => {
               value={newContact.name}
               onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
               disabled={isSubmitting}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+              className="w-full px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
             />
             
             <input
@@ -196,14 +174,14 @@ const EmergencyContacts = () => {
               value={newContact.phone}
               onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
               disabled={isSubmitting}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+              className="w-full px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
             />
             
             <select
               value={newContact.relationship}
               onChange={(e) => setNewContact({ ...newContact, relationship: e.target.value })}
               disabled={isSubmitting}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
+              className="w-full px-4 py-3 min-h-[48px] touch-manipulation border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base shadow-sm disabled:bg-gray-100 disabled:cursor-not-allowed transition-all"
             >
               {relationshipTypes.filter(t => !['emergency', 'medical', 'fire', 'helpline'].includes(t.id)).map(type => (
                 <option key={type.id} value={type.id}>
@@ -212,11 +190,11 @@ const EmergencyContacts = () => {
               ))}
             </select>
             
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={handleAddContact}
                 disabled={isSubmitting}
-                className="flex-1 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg transition-all duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                className="flex-1 py-3 px-4 min-h-[48px] touch-manipulation bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg transition-all duration-200 text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-95"
               >
                 {isSubmitting ? 'Adding...' : '✓ Add Contact'}
               </button>
@@ -226,7 +204,7 @@ const EmergencyContacts = () => {
                   setNewContact({ name: '', phone: '', relationship: 'personal', priority: 10 });
                 }}
                 disabled={isSubmitting}
-                className="flex-1 py-2.5 px-4 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 min-h-[48px] touch-manipulation bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-all duration-200 text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
               >
                 Cancel
               </button>
@@ -299,31 +277,33 @@ const EmergencyContacts = () => {
                   </div>
                   
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-4 pt-3 border-t border-gray-200">
                     <button
                       onClick={() => handleCall(contact.phone)}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-95 font-semibold"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 min-h-[48px] touch-manipulation text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-95 font-semibold"
                       title="Call this contact"
                     >
                       <PhoneIcon className="w-5 h-5" />
-                      <span>Call</span>
+                      <span className="text-sm sm:text-base">Call</span>
                     </button>
                     
                     {!contact.is_default ? (
                       <button
                         onClick={() => handleDeleteContact(contact.id, contact.is_default)}
-                        className="p-3 text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
+                        className="w-full sm:w-auto p-3 min-h-[48px] touch-manipulation text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95"
                         title="Delete contact"
                       >
-                        <TrashIcon className="w-5 h-5" />
+                        <TrashIcon className="w-5 h-5 mx-auto sm:mx-0" />
+                        <span className="sm:hidden ml-2">Delete</span>
                       </button>
                     ) : (
                       <button
-                        className="p-3 bg-gray-300 text-gray-500 rounded-xl cursor-not-allowed opacity-60"
+                        className="w-full sm:w-auto p-3 min-h-[48px] bg-gray-300 text-gray-500 rounded-xl cursor-not-allowed opacity-60"
                         title="Cannot delete default contacts"
                         disabled
                       >
-                        <TrashIcon className="w-5 h-5" />
+                        <TrashIcon className="w-5 h-5 mx-auto sm:mx-0" />
+                        <span className="sm:hidden ml-2">Delete</span>
                       </button>
                     )}
                   </div>
@@ -335,21 +315,21 @@ const EmergencyContacts = () => {
       </div>
 
       {/* Quick Call Button */}
-      <div className="mt-8 p-6 bg-gradient-to-br from-red-50 via-orange-50 to-red-50 border-2 border-red-300 rounded-2xl shadow-xl">
+      <div className="mt-6 md:mt-8 p-4 md:p-6 bg-gradient-to-br from-red-50 via-orange-50 to-red-50 border-2 border-red-300 rounded-2xl shadow-xl">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-            <span className="text-2xl">🚨</span>
+            <span className="text-xl md:text-2xl">🚨</span>
           </div>
           <div>
-            <h4 className="text-base font-bold text-gray-900">Emergency Quick Dial</h4>
+            <h4 className="text-sm md:text-base font-bold text-gray-900">Emergency Quick Dial</h4>
             <p className="text-xs text-gray-600">Instant emergency response</p>
           </div>
         </div>
         <button
           onClick={() => handleCall('100')}
-          className="w-full flex items-center justify-center gap-3 py-4 bg-gradient-to-r from-red-600 via-red-700 to-red-600 text-white rounded-xl hover:from-red-700 hover:via-red-800 hover:to-red-700 shadow-xl hover:shadow-2xl transition-all duration-300 font-extrabold text-lg transform hover:scale-[1.03] active:scale-95 border-2 border-red-800"
+          className="w-full flex items-center justify-center gap-3 py-4 min-h-[56px] touch-manipulation bg-gradient-to-r from-red-600 via-red-700 to-red-600 text-white rounded-xl hover:from-red-700 hover:via-red-800 hover:to-red-700 shadow-xl hover:shadow-2xl transition-all duration-300 font-extrabold text-base md:text-lg transform hover:scale-[1.03] active:scale-95 border-2 border-red-800"
         >
-          <PhoneIcon className="w-7 h-7 animate-pulse" />
+          <PhoneIcon className="w-6 h-6 md:w-7 md:h-7 animate-pulse" />
           <span>Call 100 Now</span>
         </button>
       </div>

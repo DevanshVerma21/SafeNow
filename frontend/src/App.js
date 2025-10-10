@@ -28,6 +28,30 @@ import { WebSocketProvider } from './context/WebSocketContext';
 import { LocationProvider } from './context/LocationContext';
 import { SidebarProvider, useSidebar } from './context/SidebarContext';
 
+// Main content wrapper component
+const MainContent = ({ children, isAuthenticated }) => {
+  const { isOpen, isMobile } = useSidebar();
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={
+        isAuthenticated 
+          ? `flex-1 transition-all duration-300 ${
+              isMobile 
+                ? 'min-h-screen bg-gray-50/50 p-4' 
+                : `min-h-screen bg-gray-50/50 p-6`
+            }` 
+          : "flex-1 min-h-screen"
+      }
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole = null }) => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -79,7 +103,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex">
       <Toaster 
         position="top-right"
         toastOptions={{
@@ -98,12 +122,7 @@ function AppContent() {
       {isAuthenticated && <Sidebar />}
       {isAuthenticated && (user?.role === 'volunteer' || user?.role === 'responder') && <FloatingAlertButton />}
       
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className={isAuthenticated ? `transition-all duration-300 ml-80 min-h-screen bg-gray-50/50 p-6` : "min-h-screen"}
-      >
+      <MainContent isAuthenticated={isAuthenticated}>
         <Routes>
           <Route 
             path="/login" 
@@ -222,7 +241,7 @@ function AppContent() {
             } 
           />
         </Routes>
-      </motion.div>
+      </MainContent>
     </div>
   );
 }

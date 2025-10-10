@@ -10,6 +10,7 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import HamburgerMenu from '../layout/HamburgerMenu';
 
 const QuickActions = () => {
   const { getCurrentLocation, startTracking, stopTracking, isTracking } = useLocation();
@@ -110,10 +111,11 @@ const QuickActions = () => {
   ];
 
   return (
-    <div className="modern-card p-6">
-      <div className="flex items-center mb-6">
-        <InformationCircleIcon className="w-6 h-6 text-blue-600 mr-2" />
-        <h3 className="text-xl font-bold gradient-text">Quick Actions</h3>
+    <div className="modern-card p-4 md:p-6">
+      <div className="flex items-center gap-3 mb-4 md:mb-6">
+        <HamburgerMenu />
+        <InformationCircleIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+        <h3 className="text-lg md:text-xl font-bold gradient-text">Quick Actions</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-3">
@@ -126,17 +128,17 @@ const QuickActions = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
               onClick={action.action}
-              className={`w-full p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 text-left ${action.bgColor}`}
+              className={`w-full p-4 min-h-[64px] touch-manipulation rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 text-left active:scale-95 ${action.bgColor}`}
             >
               <div className="flex items-start space-x-3">
                 <div className={`p-2 rounded-lg bg-gradient-to-r ${action.color}`}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-gray-900 truncate">
+                  <h4 className="text-sm sm:text-base font-medium text-gray-900 truncate">
                     {action.title}
                   </h4>
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
                     {action.description}
                   </p>
                 </div>

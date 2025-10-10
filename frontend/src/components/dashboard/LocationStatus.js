@@ -8,6 +8,7 @@ import {
   XCircleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
+import HamburgerMenu from '../layout/HamburgerMenu';
 
 const LocationStatus = () => {
   const { currentLocation, locationPermission, isTracking, requestLocationPermission } = useLocation();
@@ -52,10 +53,11 @@ const LocationStatus = () => {
   const StatusIcon = locationStatus.icon;
 
   return (
-    <div className="modern-card p-6">
-      <div className="flex items-center mb-6">
-        <MapPinIcon className="w-6 h-6 text-blue-600 mr-2" />
-        <h3 className="text-xl font-bold gradient-text">Location Status</h3>
+    <div className="modern-card p-4 md:p-6">
+      <div className="flex items-center gap-3 mb-4 md:mb-6">
+        <HamburgerMenu />
+        <MapPinIcon className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+        <h3 className="text-lg md:text-xl font-bold gradient-text">Location Status</h3>
       </div>
 
       <motion.div
@@ -84,7 +86,7 @@ const LocationStatus = () => {
         {locationStatus.status !== 'success' && (
           <button
             onClick={requestLocationPermission}
-            className="mt-3 w-full flex items-center justify-center space-x-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            className="mt-3 w-full flex items-center justify-center space-x-2 py-3 px-4 min-h-[48px] touch-manipulation bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors duration-200 text-sm sm:text-base"
           >
             <ArrowPathIcon className="w-4 h-4" />
             <span>Get Location</span>

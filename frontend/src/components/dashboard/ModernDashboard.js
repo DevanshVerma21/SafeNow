@@ -13,6 +13,7 @@ import SafetyTips from './SafetyTips';
 import GlassCard from '../common/GlassCard';
 import ModernCard from '../common/ModernCard';
 import StatusBadge from '../common/StatusBadge';
+import HamburgerMenu from '../layout/HamburgerMenu';
 import { 
   MapPinIcon,
   ClockIcon,
@@ -98,46 +99,49 @@ const ModernDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen py-6 animate-fade-in">
+    <div className="min-h-screen py-4 md:py-6 animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-6 md:mb-8"
         >
-          <GlassCard className="p-8 relative overflow-hidden">
+          <GlassCard className="p-4 md:p-8 relative overflow-hidden">
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary-400 to-primary-600"></div>
             </div>
             
             <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <motion.h1 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl font-bold gradient-text font-display"
-                >
-                  Welcome back, {user?.name || 'User'}!
-                </motion.h1>
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-neutral-600 mt-2 text-lg"
-                >
-                  Stay safe and connected with emergency services
-                </motion.p>
+              <div className="flex items-center gap-3">
+                <HamburgerMenu />
+                <div>
+                  <motion.h1 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-2xl md:text-3xl font-bold gradient-text font-display"
+                  >
+                    Welcome back, {user?.name || 'User'}!
+                  </motion.h1>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-neutral-600 mt-1 md:mt-2 text-base md:text-lg"
+                  >
+                    Stay safe and connected with emergency services
+                  </motion.p>
+                </div>
               </div>
               
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="mt-4 sm:mt-0 flex items-center gap-3"
+                className="mt-3 sm:mt-0 flex flex-wrap items-center gap-2 md:gap-3"
               >
                 <StatusBadge 
                   status={connectionStatus === 'connected' ? 'online' : 'offline'}

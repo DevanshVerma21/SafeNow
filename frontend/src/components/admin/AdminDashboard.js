@@ -21,6 +21,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import MapMarker from '../common/MapMarker';
 import LocationPin from '../common/LocationPin';
+import HamburgerMenu from '../layout/HamburgerMenu';
 
 const API_BASE = process.env.REACT_APP_API || 'http://localhost:8000';
 
@@ -253,14 +254,17 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 md:space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="flex justify-between items-center bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Emergency Response Management & Monitoring</p>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-200 gap-4">
+        <div className="flex items-center gap-3">
+          <HamburgerMenu />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">Emergency Response Management & Monitoring</p>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center space-x-2 bg-green-100 px-3 py-2 rounded-lg">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-sm text-green-800 font-medium">Live</span>
@@ -268,20 +272,20 @@ const AdminDashboard = () => {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center space-x-2 bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50"
+            className="flex items-center space-x-2 bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 md:px-4 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 touch-manipulation"
           >
-            <ArrowPathIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon className={`w-4 h-4 md:w-5 md:h-5 ${refreshing ? 'animate-spin' : ''}`} />
             <span className="text-sm font-medium">Refresh</span>
           </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            className={`flex items-center space-x-2 px-3 md:px-4 py-2 rounded-lg font-medium transition-all duration-200 touch-manipulation ${
               showFilters
                 ? 'bg-purple-500 text-white shadow-lg'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            <FunnelIcon className="w-5 h-5" />
+            <FunnelIcon className="w-4 h-4 md:w-5 md:h-5" />
             <span className="text-sm font-medium">Filters</span>
           </button>
         </div>
@@ -297,21 +301,21 @@ const AdminDashboard = () => {
             className="overflow-hidden"
           >
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Search */}
-                <div className="relative">
+                <div className="relative sm:col-span-2 lg:col-span-1">
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search by ID, type, user, location..."
+                    placeholder="Search alerts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base touch-manipulation"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 touch-manipulation"
                     >
                       <XMarkIcon className="w-5 h-5 text-gray-400 hover:text-gray-600" />
                     </button>
@@ -322,7 +326,7 @@ const AdminDashboard = () => {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base touch-manipulation"
                 >
                   <option value="all">All Types</option>
                   <option value="fire">Fire</option>
@@ -336,7 +340,7 @@ const AdminDashboard = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm md:text-base touch-manipulation"
                 >
                   <option value="all">All Status</option>
                   <option value="open">Open</option>
@@ -351,65 +355,65 @@ const AdminDashboard = () => {
       </AnimatePresence>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
+          className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                <ExclamationTriangleIcon className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <ExclamationTriangleIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Active Alerts</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalActiveAlerts}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Total Active Alerts</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">{stats.totalActiveAlerts}</p>
               </div>
             </div>
           </div>
-          <p className="text-xs text-red-500 mt-3">Requires immediate attention</p>
+          <p className="text-xs text-red-500 mt-2 md:mt-3">Requires immediate attention</p>
         </motion.div>
 
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
+          className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <UserGroupIcon className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <UserGroupIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Responders Online</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalRespondersOnline}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Responders Online</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">{stats.totalRespondersOnline}</p>
               </div>
             </div>
           </div>
-          <p className="text-xs text-blue-500 mt-3">Active and available</p>
+          <p className="text-xs text-blue-500 mt-2 md:mt-3">Active and available</p>
         </motion.div>
 
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
-          className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
+          className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <ClockIcon className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <ClockIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.averageResponseTime}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Avg Response Time</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">{stats.averageResponseTime}</p>
               </div>
             </div>
           </div>
-          <p className="text-xs text-purple-500 mt-3">Based on recent alerts</p>
+          <p className="text-xs text-purple-500 mt-2 md:mt-3">Based on recent alerts</p>
         </motion.div>
 
         <motion.div
@@ -419,40 +423,40 @@ const AdminDashboard = () => {
           className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300"
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <CheckCircleIcon className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                <CheckCircleIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Resolved Today</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.resolvedToday}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Resolved Today</p>
+                <p className="text-xl md:text-2xl font-bold text-gray-900">{stats.resolvedToday}</p>
               </div>
             </div>
           </div>
-          <p className="text-xs text-green-500 mt-3">Successfully handled</p>
+          <p className="text-xs text-green-500 mt-2 md:mt-3">Successfully handled</p>
         </motion.div>
       </div>
 
       {/* Alert Status Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
         {/* Active Alerts Section */}
         <motion.div
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           className="bg-white rounded-2xl shadow-lg border border-gray-200"
         >
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
+          <div className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
               <div className="flex items-center space-x-3">
-                <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
-                <h3 className="text-lg font-bold text-gray-900">Active Alerts</h3>
-                <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                <ExclamationTriangleIcon className="w-5 h-5 md:w-6 md:h-6 text-red-500" />
+                <h3 className="text-base md:text-lg font-bold text-gray-900">Active Alerts</h3>
+                <span className="bg-red-100 text-red-800 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium">
                   {activeAlerts.length}
                 </span>
               </div>
               <button
                 onClick={() => toggleSection('activeAlerts')}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors touch-manipulation"
               >
                 {expandedSections.activeAlerts ? (
                   <ChevronUpIcon className="w-5 h-5" />
@@ -462,8 +466,8 @@ const AdminDashboard = () => {
               </button>
             </div>
 
-            <div className="text-4xl font-bold text-red-600 mb-3">{activeAlerts.length}</div>
-            <p className="text-sm text-gray-600">Requiring immediate attention</p>
+            <div className="text-3xl md:text-4xl font-bold text-red-600 mb-2 md:mb-3">{activeAlerts.length}</div>
+            <p className="text-xs md:text-sm text-gray-600">Requiring immediate attention</p>
 
             <AnimatePresence>
               {expandedSections.activeAlerts && (

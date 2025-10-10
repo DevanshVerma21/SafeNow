@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { useLocation } from '../../context/LocationContext';
+import { useSidebar } from '../../context/SidebarContext';
 import { Link, useLocation as useRouterLocation } from 'react-router-dom';
 import { 
   HomeIcon, 
@@ -22,13 +23,15 @@ import {
   BuildingOffice2Icon,
   WifiIcon,
   SignalIcon,
-  NoSymbolIcon
+  NoSymbolIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const { notifications, connectionStatus } = useWebSocket();
   const { locationPermission, currentLocation } = useLocation();
+  const { isOpen, closeSidebar, isMobile } = useSidebar();
   const location = useRouterLocation();
   // Alert panel removed from sidebar per request
 
@@ -169,24 +172,53 @@ const Sidebar = () => {
   const roleBadge = getRoleBadge();
 
   return (
-    <motion.div
-      initial={{ x: -280, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white via-gray-50 to-gray-100 shadow-2xl border-r border-gray-200 z-40 flex flex-col backdrop-blur-xl"
-      style={{
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 50%, rgba(241,245,249,0.95) 100%)',
-        backdropFilter: 'blur(20px)',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
-      }}
-    >
-      {/* Brand Header with Enhanced Design */}
-      <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        className="p-6 relative overflow-hidden"
+    <>
+      {/* Mobile Backdrop */}
+      {isMobile && isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={closeSidebar}
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+        />
+      )}
+
+      {/* Sidebar */}
+      <motion.aside
+        initial={{ x: -280, opacity: 0 }}
+        animate={{ 
+          x: isOpen ? 0 : (isMobile ? -280 : 0), 
+          opacity: isOpen ? 1 : (isMobile ? 0 : 1),
+          width: isOpen ? (isMobile ? '288px' : '320px') : (isMobile ? '0px' : '320px')
+        }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className={`${isMobile ? 'fixed' : 'relative'} ${isMobile ? 'left-0 top-0 h-screen' : 'h-screen'} ${isOpen || !isMobile ? 'w-72 md:w-80' : 'w-0'} bg-gradient-to-br from-white via-gray-50 to-gray-100 shadow-2xl border-r border-gray-200 ${isMobile ? 'z-40' : 'z-10'} flex flex-col backdrop-blur-xl ${
+          !isOpen && isMobile ? 'pointer-events-none' : ''
+        } ${!isOpen && !isMobile ? 'overflow-hidden' : ''}`}
+        style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 50%, rgba(241,245,249,0.95) 100%)',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
+        }}
       >
+        {/* Mobile Close Button */}
+        {isMobile && (
+          <button
+            onClick={closeSidebar}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-white shadow-md hover:bg-gray-50 transition-colors z-50 md:hidden"
+          >
+            <XMarkIcon className="w-5 h-5 text-gray-600" />
+          </button>
+        )}
+
+        {/* Brand Header with Enhanced Design */}
+        <motion.div
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="p-4 md:p-6 relative overflow-hidden"
+        >
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-red-600 to-red-700 opacity-95"></div>
         <div className="absolute inset-0 opacity-20" style={{
@@ -238,7 +270,7 @@ const Sidebar = () => {
       </motion.div>
 
       {/* Navigation Section */}
-      <div className="flex-1 px-4 space-y-2 overflow-y-auto">
+      <div className="flex-1 px-4 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
         <motion.h4
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -262,10 +294,11 @@ const Sidebar = () => {
             >
               <Link
                 to={item.path}
-                className={`group flex items-center justify-between p-4 rounded-xl transition-all duration-300 relative overflow-hidden ${
+                onClick={isMobile ? closeSidebar : undefined}
+                className={`group flex items-center justify-between p-4 md:p-4 min-h-[56px] touch-manipulation rounded-xl transition-all duration-300 relative overflow-hidden ${
                   isActive 
                     ? `bg-gradient-to-r ${roleColors.light} text-${roleColors.accent} shadow-lg border border-gray-200` 
-                    : 'hover:bg-white/60 hover:shadow-md text-gray-700 hover:text-gray-900'
+                    : 'hover:bg-white/60 hover:shadow-md text-gray-700 hover:text-gray-900 active:bg-gray-100'
                 }`}
                 style={isActive ? {
                   boxShadow: '0 8px 25px -8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset'
@@ -324,7 +357,7 @@ const Sidebar = () => {
           href="tel:100"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="flex items-center space-x-3 p-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white transition-all duration-300 hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-xl"
+          className="flex items-center space-x-3 p-4 min-h-[56px] touch-manipulation rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white transition-all duration-300 hover:from-red-600 hover:to-red-700 shadow-lg hover:shadow-xl active:from-red-700 active:to-red-800"
           style={{
             boxShadow: '0 8px 25px -8px rgba(239, 68, 68, 0.4)'
           }}
@@ -339,7 +372,7 @@ const Sidebar = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => alert('Settings functionality coming soon!')}
-            className="flex items-center justify-center p-3 rounded-xl bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-800 transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200"
+            className="flex items-center justify-center p-3 min-h-[48px] touch-manipulation rounded-xl bg-white hover:bg-gray-50 text-gray-600 hover:text-gray-800 transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200 active:bg-gray-100"
           >
             <Cog6ToothIcon className="w-5 h-5" />
           </motion.button>
@@ -348,7 +381,7 @@ const Sidebar = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={logout}
-            className="flex items-center justify-center p-3 rounded-xl bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200 hover:border-red-200"
+            className="flex items-center justify-center p-3 min-h-[48px] touch-manipulation rounded-xl bg-white hover:bg-red-50 text-gray-600 hover:text-red-600 transition-all duration-300 shadow-md hover:shadow-lg border border-gray-200 hover:border-red-200 active:bg-red-100"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
           </motion.button>
@@ -370,7 +403,8 @@ const Sidebar = () => {
       </motion.div>
 
       {/* Alert panel removed */}
-    </motion.div>
+      </motion.aside>
+    </>
   );
 };
 
